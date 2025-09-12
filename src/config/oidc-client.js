@@ -40,7 +40,11 @@ const ADMIN_CLIENT_CONFIG = {
 const getOidcEndpoints = (baseUrl = process.env.ISSUER || 'http://localhost:3000') => {
   // For internal container communication, use OIDC_INTERNAL_BASE_URL if available
   // For external URLs (like authorization_endpoint), use the configured ISSUER
-  const internalBaseUrl = process.env.OIDC_INTERNAL_BASE_URL || 'http://localhost:3000';
+  const internalBaseUrl = process.env.OIDC_INTERNAL_BASE_URL || baseUrl;
+  
+  console.log(`OIDC Endpoint Configuration:`);
+  console.log(`- External base URL (ISSUER): ${baseUrl}`);
+  console.log(`- Internal base URL: ${internalBaseUrl}`);
   
   return {
     issuer: baseUrl,
