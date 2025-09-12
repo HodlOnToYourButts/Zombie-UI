@@ -50,18 +50,6 @@ const validationRules = {
     body('password').notEmpty().withMessage('Password is required')
   ],
   
-  register: [
-    commonRules.username,
-    commonRules.email,
-    commonRules.password,
-    body('confirmPassword')
-      .custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new Error('Passwords do not match');
-        }
-        return true;
-      })
-  ],
   
   // OAuth2 endpoints
   authorize: [
