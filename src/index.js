@@ -168,7 +168,8 @@ app.use((req, res, next) => {
 // Add OIDC user to all templates (must be after session middleware)
 app.use((req, res, next) => {
   console.log('Session middleware - path:', req.path, 'session.oidc_user exists:', !!req.session?.oidc_user);
-  res.locals.oidc_user = req.oidc_user || null;
+  req.oidc_user = req.session?.oidc_user || null;
+  res.locals.oidc_user = req.oidc_user;
   next();
 });
 

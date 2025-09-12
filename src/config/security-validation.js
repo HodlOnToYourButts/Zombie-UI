@@ -5,7 +5,7 @@ const INSECURE_DEFAULTS = [
   'password', 
   'your-secret-key-here-change-in-production',
   'your-session-secret-change-in-production',
-  'zombieauth-admin-secret-change-in-production',
+  'client-secret-change-in-production',
   'replication-secret-change-in-production',
   'datacenter1-session-secret-change-in-production',
   'datacenter2-session-secret-change-in-production', 
@@ -23,11 +23,10 @@ const SECURITY_REQUIREMENTS = {
   ADMIN_PASSWORD: { minLength: process.env.NODE_ENV === 'development' ? 3 : 12, requireComplex: false },
   COUCHDB_USER: { minLength: 5, pattern: /^[a-zA-Z0-9_-]+$/ },
   COUCHDB_PASSWORD: { minLength: 12, requireComplex: false },
-  JWT_SECRET: { minLength: 32, entropy: 'high' },
   SESSION_SECRET: { minLength: 32, entropy: 'high' },
-  ADMIN_CLIENT_SECRET: { minLength: 32, entropy: 'high' },
+  CLIENT_SECRET: { minLength: 32, entropy: 'high' },
   COUCHDB_SECRET: { minLength: 32, entropy: 'high' },
-  DEFAULT_CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
+  CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
 };
 
 function validateSecurityConfiguration() {

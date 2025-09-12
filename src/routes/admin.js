@@ -4,7 +4,6 @@ const Session = require('../models/Session');
 const Activity = require('../models/Activity');
 const Client = require('../models/Client');
 const database = require('../database');
-const oidcAuth = require('../middleware/oidc-auth');
 const { getClientIp } = require('../utils/ip-helper');
 const ConflictDetector = require('../services/conflict-detector');
 const ClusterHealth = require('../services/cluster-health');
@@ -27,9 +26,9 @@ function formatUptime(seconds) {
 
 const router = express.Router();
 
-// Helper function to ensure oidc_user is set in render context
-function addOidcUser(req, renderData) {
-  return { ...renderData, oidc_user: req.oidc_user };
+// Helper function to add user context to render data
+function addUserContext(req, renderData) {
+  return { ...renderData };
 }
 
 // Login is handled directly via /auth route - no separate login page needed
@@ -89,7 +88,7 @@ router.get('/', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       syncedRecords
     };
     
-    res.render('dashboard', addOidcUser(req, {
+    res.render('dashboard', addUserContext(req, {
       title: 'Dashboard',
       isDashboard: true,
       stats,
@@ -100,7 +99,7 @@ router.get('/', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     }));
   } catch (error) {
     console.error('Dashboard error:', error);
-    res.render('dashboard', addOidcUser(req, {
+    res.render('dashboard', addUserContext(req, {
       title: 'Dashboard',
       isDashboard: true,
       stats: { totalDocs: 0, dbConflicts: 0, isolatedRecords: 0, syncedRecords: 0 },
@@ -175,7 +174,7 @@ router.get('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       totalUsers: users.length
     };
     
-    res.render('users', addOidcUser(req, {
+    res.render('users', addUserContext(req, {
       title: 'Users',
       isUsers: true,
       users: sortedUsers,
@@ -183,7 +182,7 @@ router.get('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     }));
   } catch (error) {
     console.error('Users list error:', error);
-    res.render('users', addOidcUser(req, {
+    res.render('users', addUserContext(req, {
       title: 'Users',
       isUsers: true,
       users: [],
@@ -196,7 +195,7 @@ router.get('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
 
 // New user form
 router.get('/users/new', oidcAuth.requireOidcAuth('admin'), (req, res) => {
-  res.render('user-form', addOidcUser(req, {
+  res.render('user-form', addUserContext(req, {
     title: 'Add User',
     isUsers: true
   }));
@@ -208,7 +207,7 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     const { username, email, password, firstName, lastName, groups, roles, enabled, emailVerified } = req.body;
     
     if (!username || !email || !password) {
-      return res.render('user-form', addOidcUser(req, {
+      return res.render('user-form', addUserContext(req, {
         title: 'Add User',
         isUsers: true,
         message: 'Username, email, and password are required',
@@ -220,7 +219,7 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     // Check if user exists
     const existingUser = await User.findByUsername(username);
     if (existingUser) {
-      return res.render('user-form', addOidcUser(req, {
+      return res.render('user-form', addUserContext(req, {
         title: 'Add User',
         isUsers: true,
         message: 'Username already exists',
@@ -231,7 +230,7 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     
     const existingEmail = await User.findByEmail(email);
     if (existingEmail) {
-      return res.render('user-form', addOidcUser(req, {
+      return res.render('user-form', addUserContext(req, {
         title: 'Add User',
         isUsers: true,
         message: 'Email already exists',
@@ -269,7 +268,7 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     res.redirect('/admin/users?message=User created successfully&messageType=success');
   } catch (error) {
     console.error('Create user error:', error);
-    res.render('user-form', addOidcUser(req, {
+    res.render('user-form', addUserContext(req, {
       title: 'Add User',
       isUsers: true,
       message: 'Error creating user: ' + error.message,
@@ -298,7 +297,7 @@ router.get('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
       }))
       .slice(0, 5); // Limit to 5 sessions
     
-    res.render('user-details', addOidcUser(req, {
+    res.render('user-details', addUserContext(req, {
       title: 'User Details',
       isUsers: true,
       user: user.toPublicJSON(),
@@ -322,7 +321,7 @@ router.get('/users/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, res
       return res.redirect('/admin/users?message=User not found&messageType=danger');
     }
     
-    res.render('user-form', addOidcUser(req, {
+    res.render('user-form', addUserContext(req, {
       title: 'Edit User',
       isUsers: true,
       user: user.toPublicJSON()
@@ -349,7 +348,7 @@ router.put('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
     if (email !== user.email) {
       const existingEmail = await User.findByEmail(email);
       if (existingEmail) {
-        return res.render('user-form', addOidcUser(req, {
+        return res.render('user-form', addUserContext(req, {
           title: 'Edit User',
           isUsers: true,
           user: user.toPublicJSON(),
@@ -384,7 +383,7 @@ router.put('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
   } catch (error) {
     console.error('Update user error:', error);
     const user = await User.findById(req.params.id);
-    res.render('user-form', addOidcUser(req, {
+    res.render('user-form', addUserContext(req, {
       title: 'Edit User',
       isUsers: true,
       user: user ? user.toPublicJSON() : {},
@@ -441,7 +440,7 @@ router.get('/sessions', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       expiredSessions: sessionsWithUsers.filter(s => s.active && s.isExpired).length
     };
     
-    res.render('sessions', addOidcUser(req, {
+    res.render('sessions', addUserContext(req, {
       title: 'Sessions',
       isSessions: true,
       sessions: sessionsWithUsers,
@@ -449,7 +448,7 @@ router.get('/sessions', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     }));
   } catch (error) {
     console.error('Sessions list error:', error);
-    res.render('sessions', addOidcUser(req, {
+    res.render('sessions', addUserContext(req, {
       title: 'Sessions',
       isSessions: true,
       sessions: [],
@@ -499,9 +498,9 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     });
     
     // Sort clients to pin default client to the top
-    const defaultClientId = process.env.DEFAULT_CLIENT_ID;
+    const defaultClientId = process.env.CLIENT_ID;
     if (!defaultClientId) {
-      throw new Error('DEFAULT_CLIENT_ID environment variable must be set for security');
+      throw new Error('CLIENT_ID environment variable must be set for security');
     }
     const sortedClients = clients.sort((a, b) => {
       if (a.clientId === defaultClientId) return -1;
@@ -517,7 +516,7 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       totalClients: clients.length
     };
     
-    res.render('clients', addOidcUser(req, {
+    res.render('clients', addUserContext(req, {
       title: 'Clients',
       isClients: true,
       clients: sortedClients.map(client => {
@@ -529,7 +528,7 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     }));
   } catch (error) {
     console.error('Clients list error:', error);
-    res.render('clients', addOidcUser(req, {
+    res.render('clients', addUserContext(req, {
       title: 'Clients',
       isClients: true,
       clients: [],
@@ -542,7 +541,7 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
 
 // New client form
 router.get('/clients/new', oidcAuth.requireOidcAuth('admin'), (req, res) => {
-  res.render('client-form', addOidcUser(req, {
+  res.render('client-form', addUserContext(req, {
     title: 'Add Client',
     isClients: true
   }));
@@ -554,7 +553,7 @@ router.post('/clients', oidcAuth.requireOidcAuth('admin'), validationRules.creat
     const { name, description, redirectUris, scopes, grantTypes, responseTypes, confidential } = req.body;
     
     if (!name || !redirectUris) {
-      return res.render('client-form', addOidcUser(req, {
+      return res.render('client-form', addUserContext(req, {
         title: 'Add Client',
         isClients: true,
         message: 'Name and redirect URIs are required',
@@ -589,7 +588,7 @@ router.post('/clients', oidcAuth.requireOidcAuth('admin'), validationRules.creat
     res.redirect('/admin/clients?message=Client created successfully&messageType=success');
   } catch (error) {
     console.error('Create client error:', error);
-    res.render('client-form', addOidcUser(req, {
+    res.render('client-form', addUserContext(req, {
       title: 'Add Client',
       isClients: true,
       message: 'Error creating client: ' + error.message,
@@ -608,7 +607,7 @@ router.get('/clients/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, r
       return res.redirect('/admin/clients?message=Client not found&messageType=danger');
     }
     
-    res.render('client-form', addOidcUser(req, {
+    res.render('client-form', addUserContext(req, {
       title: 'Edit Client',
       isClients: true,
       client: client.toPublicJSON(),
@@ -632,7 +631,7 @@ router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
     const { name, description, redirectUris, scopes, grantTypes, responseTypes, confidential, enabled } = req.body;
     
     if (!name || !redirectUris) {
-      return res.render('client-form', addOidcUser(req, {
+      return res.render('client-form', addUserContext(req, {
         title: 'Edit Client',
         isClients: true,
         client: client.toPublicJSON(),
@@ -668,7 +667,7 @@ router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
   } catch (error) {
     console.error('Update client error:', error);
     const client = await Client.findById(req.params.id);
-    res.render('client-form', addOidcUser(req, {
+    res.render('client-form', addUserContext(req, {
       title: 'Edit Client',
       isClients: true,
       client: client ? client.toPublicJSON() : {},
@@ -690,7 +689,7 @@ router.get('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
     
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     
-    res.render('client-details', addOidcUser(req, {
+    res.render('client-details', addUserContext(req, {
       title: 'Client Details',
       isClients: true,
       client: client.toPublicJSON(),
@@ -749,7 +748,7 @@ router.get('/conflicts/user/:id', oidcAuth.requireOidcAuth('admin'), async (req,
     
     const allVersions = [currentVersion, ...validConflictVersions];
     
-    res.render('conflict-resolution', addOidcUser(req, {
+    res.render('conflict-resolution', addUserContext(req, {
       title: 'Resolve User Conflicts',
       isUsers: true,
       entityType: 'user',
@@ -811,7 +810,7 @@ router.get('/conflicts/client/:id', oidcAuth.requireOidcAuth('admin'), async (re
     
     const allVersions = [currentVersion, ...validConflictVersions];
     
-    res.render('conflict-resolution', addOidcUser(req, {
+    res.render('conflict-resolution', addUserContext(req, {
       title: 'Resolve Client Conflicts',
       isClients: true,
       entityType: 'client',
@@ -881,7 +880,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
     
     const allVersions = [currentVersion, ...validConflictVersions];
     
-    res.render('conflict-resolution', addOidcUser(req, {
+    res.render('conflict-resolution', addUserContext(req, {
       title: 'Resolve Session Conflicts',
       isSessions: true,
       entityType: 'session',

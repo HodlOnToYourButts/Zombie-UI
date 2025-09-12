@@ -221,15 +221,15 @@ class Database {
     const Client = require('./models/Client');
     
     try {
-      // Require DEFAULT_CLIENT_ID to be set for security
-      const sharedClientId = process.env.DEFAULT_CLIENT_ID;
+      // Require CLIENT_ID to be set for security
+      const sharedClientId = process.env.CLIENT_ID;
       if (!sharedClientId) {
-        throw new Error('DEFAULT_CLIENT_ID environment variable must be set for security. Generate with: openssl rand -hex 16');
+        throw new Error('CLIENT_ID environment variable must be set for security. Generate with: openssl rand -hex 16');
       }
       
       // Validate client ID format - should match auto-generated client IDs
       if (!sharedClientId.startsWith('client_') || sharedClientId.length !== 39) {
-        throw new Error('DEFAULT_CLIENT_ID must follow format "client_<32_hex_chars>" to match auto-generated client IDs. Generate with: openssl rand -hex 16');
+        throw new Error('CLIENT_ID must follow format "client_<32_hex_chars>" to match auto-generated client IDs. Generate with: openssl rand -hex 16');
       }
       
       // All possible redirect URIs for all instances (admin servers on ports 4000+)
