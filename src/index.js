@@ -77,16 +77,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Middleware - Configured for HTTP over yggdrasil
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "http:", "https:"]
-    },
-    upgradeInsecureRequests: false // Disable HTTPS upgrade since we use HTTP over yggdrasil
-  }
+  contentSecurityPolicy: false // Disable CSP to prevent HTTPS upgrade issues over yggdrasil
 }));
 
 // Rate limiting configuration
