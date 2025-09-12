@@ -4,6 +4,7 @@ const Session = require('../models/Session');
 const Activity = require('../models/Activity');
 const Client = require('../models/Client');
 const database = require('../database');
+const oidcAuth = require('../middleware/oidc-auth');
 const { getClientIp } = require('../utils/ip-helper');
 const ConflictDetector = require('../services/conflict-detector');
 const ClusterHealth = require('../services/cluster-health');
