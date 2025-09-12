@@ -75,7 +75,7 @@ app.engine('html', engine({
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware
+// Middleware - Configured for HTTP over yggdrasil
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -83,8 +83,9 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       fontSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    }
+      imgSrc: ["'self'", "data:", "http:", "https:"]
+    },
+    upgradeInsecureRequests: false // Disable HTTPS upgrade since we use HTTP over yggdrasil
   }
 }));
 
