@@ -28,6 +28,11 @@ function redirectToLogin(req, res) {
     req.session.oidc_state = state;
     req.session.oidc_code_verifier = codeVerifier;
     
+    console.log('OIDC Login Debug:');
+    console.log('- Generated state:', state);
+    console.log('- Session ID:', req.sessionID);
+    console.log('- Stored in session:', req.session.oidc_state);
+    
     // Build authorization URL
     const authParams = new URLSearchParams({
       response_type: 'code',
@@ -42,7 +47,14 @@ function redirectToLogin(req, res) {
     const authUrl = `${endpoints.authorization_endpoint}?${authParams}`;
     console.log('Redirecting to OIDC provider:', authUrl);
     
-    res.redirect(authUrl);
+    // Ensure session is saved before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session before OIDC redirect:', err);
+        return res.status(500).send('Session error');
+      }
+      res.redirect(authUrl);
+    });
   } catch (error) {
     console.error('Error redirecting to OIDC login:', error);
     res.status(500).send('Authentication error');
@@ -54,9 +66,17 @@ async function handleCallback(req, res) {
   try {
     const { code, state } = req.query;
     
+    console.log('OIDC Callback Debug:');
+    console.log('- Received state:', state);
+    console.log('- Session oidc_state:', req.session.oidc_state);
+    console.log('- Session ID:', req.sessionID);
+    console.log('- Session keys:', Object.keys(req.session || {}));
+    
     // Verify state parameter for CSRF protection
     if (!state || state !== req.session.oidc_state) {
-      console.error('Invalid state parameter');
+      console.error('Invalid state parameter - state mismatch');
+      console.error('Expected:', req.session.oidc_state);
+      console.error('Received:', state);
       return res.status(400).send('Invalid state parameter');
     }
     
