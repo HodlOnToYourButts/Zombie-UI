@@ -141,12 +141,13 @@ app.use(session({
   name: `zombieauth-admin-session-${process.env.INSTANCE_ID || 'default'}`,
   secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // Changed to true to ensure session is created
   store: sessionStore,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Set to false for development/HTTP
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax' // Allow cross-site cookies for OIDC flow
   }
 }));
 
@@ -167,7 +168,13 @@ app.use((req, res, next) => {
 
 // Add OIDC user to all templates (must be after session middleware)
 app.use((req, res, next) => {
-  console.log('Session middleware - path:', req.path, 'session.oidc_user exists:', !!req.session?.oidc_user);
+  console.log('Session middleware - path:', req.path);
+  console.log('- Session ID:', req.sessionID);
+  console.log('- Session exists:', !!req.session);
+  console.log('- Session keys:', req.session ? Object.keys(req.session) : 'none');
+  console.log('- Cookies:', req.headers.cookie || 'none');
+  console.log('- OIDC user exists:', !!req.session?.oidc_user);
+  
   req.oidc_user = req.session?.oidc_user || null;
   res.locals.oidc_user = req.oidc_user;
   next();
