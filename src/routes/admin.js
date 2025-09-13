@@ -548,8 +548,25 @@ router.get('/clients/new', oidcAuth.requireOidcAuth('admin'), (req, res) => {
   }));
 });
 
+// Middleware to preprocess client form data
+const preprocessClientData = (req, res, next) => {
+  if (req.body.redirectUris && typeof req.body.redirectUris === 'string') {
+    req.body.redirectUris = req.body.redirectUris.split('\n').map(uri => uri.trim()).filter(uri => uri);
+  }
+  if (req.body.scopes && typeof req.body.scopes === 'string') {
+    req.body.scopes = req.body.scopes.split(',').map(s => s.trim()).filter(s => s);
+  }
+  if (req.body.grantTypes && typeof req.body.grantTypes === 'string') {
+    req.body.grantTypes = req.body.grantTypes.split(',').map(gt => gt.trim()).filter(gt => gt);
+  }
+  if (req.body.responseTypes && typeof req.body.responseTypes === 'string') {
+    req.body.responseTypes = req.body.responseTypes.split(',').map(rt => rt.trim()).filter(rt => rt);
+  }
+  next();
+};
+
 // Create client
-router.post('/clients', oidcAuth.requireOidcAuth('admin'), validationRules.createClient, handleValidationErrors, async (req, res) => {
+router.post('/clients', oidcAuth.requireOidcAuth('admin'), preprocessClientData, validationRules.createClient, handleValidationErrors, async (req, res) => {
   try {
     const { name, description, redirectUris, scopes, grantTypes, responseTypes, confidential } = req.body;
     
@@ -567,10 +584,10 @@ router.post('/clients', oidcAuth.requireOidcAuth('admin'), validationRules.creat
     const client = new Client({
       name,
       description,
-      redirectUris: redirectUris.split('\n').map(uri => uri.trim()).filter(uri => uri),
-      scopes: scopes ? scopes.split(',').map(s => s.trim()).filter(s => s) : ['openid', 'profile', 'email'],
-      grantTypes: grantTypes ? grantTypes.split(',').map(gt => gt.trim()).filter(gt => gt) : ['authorization_code', 'refresh_token'],
-      responseTypes: responseTypes ? responseTypes.split(',').map(rt => rt.trim()).filter(rt => rt) : ['code'],
+      redirectUris,
+      scopes: scopes && scopes.length ? scopes : ['openid', 'profile', 'email'],
+      grantTypes: grantTypes && grantTypes.length ? grantTypes : ['authorization_code', 'refresh_token'],
+      responseTypes: responseTypes && responseTypes.length ? responseTypes : ['code'],
       confidential: confidential === 'on'
     });
     
@@ -621,7 +638,7 @@ router.get('/clients/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, r
 });
 
 // Update client
-router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
+router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), preprocessClientData, async (req, res) => {
   try {
     const clientId = decodeURIComponent(req.params.id);
     const client = await Client.findById(clientId);
@@ -645,10 +662,10 @@ router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
     // Update client
     client.name = name;
     client.description = description;
-    client.redirectUris = redirectUris.split('\n').map(uri => uri.trim()).filter(uri => uri);
-    client.scopes = scopes ? scopes.split(',').map(s => s.trim()).filter(s => s) : ['openid', 'profile', 'email'];
-    client.grantTypes = grantTypes ? grantTypes.split(',').map(gt => gt.trim()).filter(gt => gt) : ['authorization_code', 'refresh_token'];
-    client.responseTypes = responseTypes ? responseTypes.split(',').map(rt => rt.trim()).filter(rt => rt) : ['code'];
+    client.redirectUris = redirectUris;
+    client.scopes = scopes && scopes.length ? scopes : ['openid', 'profile', 'email'];
+    client.grantTypes = grantTypes && grantTypes.length ? grantTypes : ['authorization_code', 'refresh_token'];
+    client.responseTypes = responseTypes && responseTypes.length ? responseTypes : ['code'];
     client.confidential = confidential === 'on';
     client.enabled = enabled === 'on';
     

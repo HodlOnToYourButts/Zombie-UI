@@ -230,11 +230,15 @@ router.delete('/sessions/:id', oidcAuth.requireOidcAuth('admin'), async (req, re
 router.post('/sessions/clear-inactive', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
   try {
     const db = database.getDb();
-    const result = await db.view('sessions', 'by_user_id', { include_docs: true });
+    // Use Mango query to find all sessions
+    const result = await db.find({
+      selector: { type: 'session' },
+      limit: 2500
+    });
     
     let count = 0;
-    for (const row of result.rows) {
-      const session = new Session(row.doc);
+    for (const doc of result.docs) {
+      const session = new Session(doc);
       if (!session.active || session.isExpired()) {
         await session.delete();
         count++;
@@ -251,11 +255,15 @@ router.post('/sessions/clear-inactive', oidcAuth.requireOidcAuth('admin'), async
 router.post('/sessions/clear-all', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
   try {
     const db = database.getDb();
-    const result = await db.view('sessions', 'by_user_id', { include_docs: true });
+    // Use Mango query to find all sessions
+    const result = await db.find({
+      selector: { type: 'session' },
+      limit: 2500
+    });
     
     let count = 0;
-    for (const row of result.rows) {
-      const session = new Session(row.doc);
+    for (const doc of result.docs) {
+      const session = new Session(doc);
       await session.delete();
       count++;
     }
