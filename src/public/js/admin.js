@@ -3,10 +3,11 @@
 // User management functions
 function toggleUser(userId, enabled) {
     if (confirm(`Are you sure you want to ${enabled ? 'enable' : 'disable'} this user?`)) {
-        fetch(`/admin/api/users/${userId}/toggle`, {
+        fetch(`/api/users/${userId}/toggle`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             body: JSON.stringify({ enabled })
         })
@@ -27,8 +28,11 @@ function toggleUser(userId, enabled) {
 
 function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        fetch(`/admin/api/users/${userId}`, {
-            method: 'DELETE'
+        fetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -48,10 +52,11 @@ function deleteUser(userId) {
 function resetPassword(userId) {
     const newPassword = prompt('Enter new password for user:');
     if (newPassword && newPassword.length >= 6) {
-        fetch(`/admin/api/users/${userId}/password`, {
+        fetch(`/api/users/${userId}/password`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             body: JSON.stringify({ password: newPassword })
         })
@@ -79,7 +84,7 @@ function showUserSessions(userId) {
     content.innerHTML = '<div class="text-center py-3"><div class="spinner-border" role="status"></div></div>';
     modal.show();
     
-    fetch(`/admin/api/users/${userId}/sessions`)
+    fetch(`/api/users/${userId}/sessions`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -118,8 +123,11 @@ function showUserSessions(userId) {
 // Session management functions
 function invalidateSession(sessionId) {
     if (confirm('Are you sure you want to invalidate this session?')) {
-        fetch(`/admin/api/sessions/${sessionId}/invalidate`, {
-            method: 'POST'
+        fetch(`/api/sessions/${sessionId}/invalidate`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -138,8 +146,11 @@ function invalidateSession(sessionId) {
 
 function deleteSession(sessionId) {
     if (confirm('Are you sure you want to delete this session?')) {
-        fetch(`/admin/api/sessions/${sessionId}`, {
-            method: 'DELETE'
+        fetch(`/api/sessions/${sessionId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -158,8 +169,11 @@ function deleteSession(sessionId) {
 
 function invalidateUserSessions(userId) {
     if (confirm('Are you sure you want to invalidate all sessions for this user?')) {
-        fetch(`/admin/api/users/${userId}/sessions/invalidate`, {
-            method: 'POST'
+        fetch(`/api/users/${userId}/sessions/invalidate`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -179,8 +193,11 @@ function invalidateUserSessions(userId) {
 
 function clearInactiveSessions() {
     if (confirm('Are you sure you want to clear all inactive sessions?')) {
-        fetch('/admin/api/sessions/clear-inactive', {
-            method: 'POST'
+        fetch('/api/sessions/clear-inactive', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -200,8 +217,11 @@ function clearInactiveSessions() {
 
 function clearAllSessions() {
     if (confirm('Are you sure you want to clear ALL sessions? This will log out all users.')) {
-        fetch('/admin/api/sessions/clear-all', {
-            method: 'POST'
+        fetch('/api/sessions/clear-all', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-Token': window.csrfToken
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -230,7 +250,7 @@ function viewSessionDetails(sessionId) {
     content.innerHTML = '<div class="text-center py-3"><div class="spinner-border" role="status"></div></div>';
     modal.show();
     
-    fetch(`/admin/api/sessions/${sessionId}`)
+    fetch(`/api/sessions/${sessionId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
