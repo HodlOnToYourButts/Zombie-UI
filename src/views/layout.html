@@ -133,6 +133,10 @@
     </footer>
 
     <script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        // Make CSRF token available to all JavaScript files
+        window.csrfToken = '{{csrfToken}}';
+    </script>
     <script src="/js/admin.js"></script>
     <script src="/js/cluster-nav.js"></script>
 </body>

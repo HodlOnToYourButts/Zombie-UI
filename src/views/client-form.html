@@ -13,6 +13,7 @@
         <div class="card">
             <div class="card-body">
                 <form method="POST" action="/clients{{#if client}}/{{encodeURIComponent client.id}}{{/if}}">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     {{#if client}}
                     <input type="hidden" name="_method" value="PUT">
                     {{/if}}

@@ -11,7 +11,8 @@
                 </p>
             </div>
             <div class="card-body">
-                <form method="POST" action="/admin/conflicts/{{entityType}}/{{entityId}}/resolve">
+                <form method="POST" action="/conflicts/{{entityType}}/{{entityId}}/resolve">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     <input type="hidden" name="mergeStrategy" value="keepVersion">
                     
                     <div class="alert alert-info">
