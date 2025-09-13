@@ -323,7 +323,9 @@ small {
 }
 
 .modal-header {
+    background: linear-gradient(135deg, var(--blood-red), var(--bright-red));
     border-bottom: 1px solid var(--border-color);
+    color: var(--zombie-text);
 }
 
 .modal-footer {
