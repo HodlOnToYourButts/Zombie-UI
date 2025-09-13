@@ -125,7 +125,7 @@ function displayClusterStatus(health) {
     const clusterStatusDiv = document.getElementById('clusterStatus');
     
     if (!health || !health.instances) {
-        clusterStatusDiv.innerHTML = '<div class="text-muted small">No cluster data</div>';
+        clusterStatusDiv.innerHTML = '<div class="text-muted small">No instance data</div>';
         return;
     }
 
@@ -135,30 +135,51 @@ function displayClusterStatus(health) {
     let statusHtml = `
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="badge bg-${summary.unhealthy === 0 ? 'success' : summary.healthy === 0 ? 'danger' : 'warning'}">
-                ${summary.healthy}/${summary.total} Healthy
+                ${summary.healthy}/${summary.total} Active
             </span>
-            <small class="text-muted">${healthyPercent}%</small>
+            <small class="text-muted">${healthyPercent}% • Rep: ${summary.replicationHealth || 0}%</small>
         </div>
     `;
 
-    // Show instance details
+    // Show instance details with replication info
     statusHtml += '<div class="small">';
     instances.forEach(instance => {
-        const statusColor = instance.status === 'healthy' ? 'success' : 
-                           instance.status === 'degraded' ? 'warning' : 'danger';
-        const statusIcon = instance.status === 'healthy' ? 'check-circle' : 
-                          instance.status === 'degraded' ? 'exclamation-triangle' : 'x-circle';
+        const statusColor = instance.status === 'active' ? 'success' : 'danger';
+        const statusIcon = instance.status === 'active' ? 'check-circle' : 'x-circle';
+        
+        // Count active replications
+        const activeReplications = instance.replications ? 
+            instance.replications.filter(r => r.state === 'running' || r.state === 'triggered').length : 0;
+        const totalReplications = instance.replications ? instance.replications.length : 0;
         
         statusHtml += `
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <span class="text-${statusColor}">
                     <i class="bi bi-${statusIcon}"></i> ${instance.name}
+                    ${instance.isCurrentInstance ? '<small class="badge bg-primary ms-1">current</small>' : ''}
                 </span>
-                ${instance.responseTime ? `<span class="text-muted">${instance.responseTime}ms</span>` : ''}
+                <div class="text-end">
+                    ${totalReplications > 0 ? 
+                        `<span class="text-muted">${activeReplications}/${totalReplications} sync</span>` : 
+                        '<span class="text-muted">no peers</span>'}
+                </div>
             </div>
         `;
     });
     statusHtml += '</div>';
+
+    // Add network health summary
+    if (summary.networkHealth) {
+        const networkColor = summary.networkHealth === 'healthy' ? 'success' : 
+                           summary.networkHealth === 'degraded' ? 'warning' : 'danger';
+        statusHtml += `
+            <div class="mt-2 pt-2 border-top">
+                <small class="text-${networkColor}">
+                    <i class="bi bi-network"></i> Network: ${summary.networkHealth}
+                </small>
+            </div>
+        `;
+    }
 
     clusterStatusDiv.innerHTML = statusHtml;
 }
