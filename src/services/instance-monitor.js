@@ -11,7 +11,19 @@ class InstanceMonitor {
    */
   async getInstanceStatus() {
     try {
-      const replications = await database.getReplicationStatus();
+      // Call the replication-monitor microservice
+      const replicationMonitorUrl = process.env.REPLICATION_MONITOR_URL || 'http://replication-monitor:8080';
+      const response = await fetch(`${replicationMonitorUrl}/replication/status/zombieauth`);
+      
+      if (!response.ok) {
+        throw new Error(`Replication monitor service failed: ${response.status}`);
+      }
+      
+      const replicationData = await response.json();
+      const replications = replicationData.replications || [];
+      
+      console.log(`Found ${replications.length} replications from replication-monitor service`);
+      
       const instances = new Map();
       
       // Add current instance
@@ -28,14 +40,14 @@ class InstanceMonitor {
       for (const replication of replications) {
         const peerInfo = this.extractPeerInfoFromReplication(replication);
         if (peerInfo) {
-          const { peerId, peerLocation, isHealthy } = peerInfo;
+          const { peerId, peerLocation, isHealthy, healthReason, lastActivity, timeSinceLastActivity } = peerInfo;
           
           if (!instances.has(peerId)) {
             instances.set(peerId, {
               id: peerId,
               location: peerLocation,
               status: isHealthy ? 'active' : 'unreachable',
-              lastSeen: replication.stateTime ? new Date(replication.stateTime) : null,
+              lastSeen: lastActivity,
               isCurrentInstance: false,
               replications: []
             });
@@ -45,7 +57,7 @@ class InstanceMonitor {
           const instance = instances.get(peerId);
           if (isHealthy && instance.status !== 'active') {
             instance.status = 'active';
-            instance.lastSeen = replication.stateTime ? new Date(replication.stateTime) : new Date();
+            instance.lastSeen = lastActivity || new Date();
           } else if (!isHealthy && instance.status === 'active') {
             instance.status = 'unreachable';
           }
@@ -53,12 +65,15 @@ class InstanceMonitor {
           // Add replication info
           instance.replications.push({
             id: replication.id,
-            direction: replication.id.includes('push-') ? 'outbound' : 'inbound',
-            state: replication.state,
-            stateReason: replication.stateReason,
-            docsRead: replication.docsRead,
-            docsWritten: replication.docsWritten,
-            lastUpdate: replication.stateTime
+            direction: peerInfo.direction,
+            state: replication.status,
+            stateReason: healthReason,
+            docsRead: replication.stats?.docs_read || 0,
+            docsWritten: replication.stats?.docs_written || 0,
+            lastUpdate: lastActivity,
+            timeSinceLastActivity: timeSinceLastActivity,
+            changesPending: replication.stats?.changes_pending || 0,
+            recentErrors: replication.recent_errors || []
           });
         }
       }
@@ -102,45 +117,77 @@ class InstanceMonitor {
    */
   extractPeerInfoFromReplication(replication) {
     try {
-      // Replication IDs follow patterns like:
-      // push-instance1-to-peer2 or pull-peer2-to-instance1
-      const replicationId = replication.id;
-      
       let peerId = null;
+      let peerLocation = 'unknown';
       let direction = null;
       
-      if (replicationId.startsWith(`push-${this.instanceId}-to-`)) {
-        // Outbound replication: push-currentInstance-to-peerX
-        peerId = replicationId.replace(`push-${this.instanceId}-to-`, '');
-        direction = 'outbound';
-      } else if (replicationId.startsWith(`pull-`) && replicationId.endsWith(`-to-${this.instanceId}`)) {
-        // Inbound replication: pull-peerX-to-currentInstance
-        peerId = replicationId.replace(`pull-`, '').replace(`-to-${this.instanceId}`, '');
-        direction = 'inbound';
+      const sourceUrl = replication.source;
+      const targetUrl = replication.target;
+      
+      // Determine direction based on which URL is remote
+      if (typeof sourceUrl === 'string' && typeof targetUrl === 'string') {
+        try {
+          const sourceUrlObj = new URL(sourceUrl);
+          const targetUrlObj = new URL(targetUrl);
+          
+          const sourceHost = sourceUrlObj.hostname;
+          const targetHost = targetUrlObj.hostname;
+          
+          // Check if source is remote (pulling FROM remote)
+          if (sourceHost !== 'localhost' && sourceHost !== '127.0.0.1' && !sourceHost.includes('localhost')) {
+            direction = 'inbound'; // pulling from remote source
+            peerId = sourceHost.split('.')[0]; // Extract instance name (e.g., 'whiteforest' from 'whiteforest.holz.ygg')
+            peerLocation = sourceHost;
+          }
+          // Check if target is remote (pushing TO remote)
+          else if (targetHost !== 'localhost' && targetHost !== '127.0.0.1' && !targetHost.includes('localhost')) {
+            direction = 'outbound'; // pushing to remote target
+            peerId = targetHost.split('.')[0]; // Extract instance name
+            peerLocation = targetHost;
+          }
+        } catch (e) {
+          console.log('Could not parse URLs for replication:', replication.id);
+        }
       }
       
       if (!peerId) return null;
       
-      // Extract location from target/source URL if possible
-      let peerLocation = 'unknown';
-      const targetUrl = direction === 'outbound' ? replication.target : replication.source;
-      if (typeof targetUrl === 'string') {
-        try {
-          const url = new URL(targetUrl);
-          peerLocation = url.hostname;
-        } catch (e) {
-          // Ignore URL parsing errors
-        }
-      }
+      // Enhanced health checking based on replication monitor API format
+      const lastActivity = replication.last_activity ? new Date(replication.last_activity) : null;
+      const timeSinceLastActivity = replication.time_since_last_activity_seconds || 0;
       
-      // Determine if replication is healthy
-      const isHealthy = replication.state === 'running' || replication.state === 'triggered';
+      let isHealthy = false;
+      let healthReason = 'unknown';
+      
+      if (replication.status === 'running') {
+        // Running is healthy if activity is recent (< 5 minutes)
+        isHealthy = timeSinceLastActivity < 300;
+        healthReason = isHealthy ? 'active' : `stalled (${Math.round(timeSinceLastActivity/60)}min since activity)`;
+      } else if (replication.status === 'retrying') {
+        isHealthy = false;
+        healthReason = replication.recent_errors.length > 0 ? 
+          `retrying: ${replication.recent_errors[0].reason.substring(0, 50)}...` : 'retrying';
+      } else if (replication.status === 'completed') {
+        // One-time replication completed successfully
+        isHealthy = true;
+        healthReason = 'completed';
+      } else if (replication.status === 'error' || replication.status === 'failed') {
+        isHealthy = false;
+        healthReason = replication.recent_errors.length > 0 ? 
+          replication.recent_errors[0].reason.substring(0, 50) + '...' : 'failed';
+      } else {
+        isHealthy = false;
+        healthReason = `status: ${replication.status}`;
+      }
       
       return {
         peerId,
         peerLocation,
         direction,
-        isHealthy
+        isHealthy,
+        healthReason,
+        lastActivity,
+        timeSinceLastActivity
       };
     } catch (error) {
       console.error('Error extracting peer info from replication:', error);
