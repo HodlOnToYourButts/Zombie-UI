@@ -49,7 +49,8 @@ async function clearInactiveSessions() {
         const response = await fetch('/api/sessions/clear-inactive', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -76,7 +77,8 @@ async function clearAllSessions() {
         const response = await fetch('/api/sessions/clear-all', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -186,7 +188,8 @@ async function invalidateSession(sessionId) {
         const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -213,7 +216,8 @@ async function deleteSession(sessionId) {
         const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });

@@ -47,7 +47,8 @@ async function resetPassword(userId) {
         const response = await fetch(`/api/users/${encodeURIComponent(userId)}/password`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin',
             body: JSON.stringify({ password: newPassword })
@@ -79,7 +80,8 @@ async function invalidateUserSessions(userId) {
         const response = await fetch(`/api/users/${encodeURIComponent(userId)}/sessions/invalidate`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -105,7 +107,8 @@ async function deleteUser(userId) {
         const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });

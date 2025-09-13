@@ -118,7 +118,8 @@ async function toggleUser(userId, enabled) {
         const response = await fetch(`/api/users/${encodeURIComponent(userId)}/toggle`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin',
             body: JSON.stringify({ enabled })
@@ -154,7 +155,8 @@ async function deleteUser(userId) {
         const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -180,7 +182,8 @@ async function invalidateSessionFromModal(sessionId) {
         const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });

@@ -51,7 +51,8 @@ async function regenerateClientSecret(clientId) {
         const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}/regenerate-secret`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -80,7 +81,8 @@ async function deleteClient(clientId) {
         const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin'
         });
@@ -107,7 +109,8 @@ async function toggleClient(clientId, enabled) {
         const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}/toggle`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': window.csrfToken
             },
             credentials: 'same-origin',
             body: JSON.stringify({ enabled })
