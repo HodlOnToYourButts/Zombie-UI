@@ -160,13 +160,14 @@ class InstanceMonitor {
       let healthReason = 'unknown';
       
       if (replication.status === 'running') {
-        // Running is healthy if activity is recent (< 5 minutes)
-        isHealthy = timeSinceLastActivity < 300;
-        healthReason = isHealthy ? 'active' : `stalled (${Math.round(timeSinceLastActivity/60)}min since activity)`;
+        // Running means the instance is reachable (connected within last 30 seconds)
+        isHealthy = true;
+        healthReason = 'connected';
       } else if (replication.status === 'retrying') {
+        // Retrying means the instance is unreachable (failed to connect)
         isHealthy = false;
         healthReason = replication.recent_errors.length > 0 ? 
-          `retrying: ${replication.recent_errors[0].reason.substring(0, 50)}...` : 'retrying';
+          `connection failed: ${replication.recent_errors[0].reason.substring(0, 40)}...` : 'connection failed';
       } else if (replication.status === 'completed') {
         // One-time replication completed successfully
         isHealthy = true;
@@ -174,7 +175,7 @@ class InstanceMonitor {
       } else if (replication.status === 'error' || replication.status === 'failed') {
         isHealthy = false;
         healthReason = replication.recent_errors.length > 0 ? 
-          replication.recent_errors[0].reason.substring(0, 50) + '...' : 'failed';
+          replication.recent_errors[0].reason.substring(0, 40) + '...' : 'failed';
       } else {
         isHealthy = false;
         healthReason = `status: ${replication.status}`;

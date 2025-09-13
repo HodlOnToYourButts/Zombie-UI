@@ -149,7 +149,7 @@ function displayClusterStatus(health) {
         
         // Count active replications
         const activeReplications = instance.replications ? 
-            instance.replications.filter(r => r.state === 'running' || r.state === 'triggered').length : 0;
+            instance.replications.filter(r => r.state === 'running' || r.state === 'completed').length : 0;
         const totalReplications = instance.replications ? instance.replications.length : 0;
         
         statusHtml += `

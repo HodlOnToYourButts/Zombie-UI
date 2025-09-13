@@ -199,6 +199,28 @@ class ClusterHealth {
                   new Date() - global.clusterIsolationState.isolationStartTime : 0
     };
   }
+
+  // Get isolation warning for admin actions
+  getIsolationWarning() {
+    const isolation = this.isClusterIsolated();
+    
+    if (!isolation.isolated) {
+      return null;
+    }
+
+    return {
+      severity: 'warning',
+      title: 'Instance Isolation Detected',
+      message: `${isolation.reason}. Changes made now may create conflicts when instances reconnect.`,
+      isolatedInstances: isolation.isolatedInstances || [],
+      isolatedSince: global.clusterIsolationState.isolationStartTime,
+      recommendations: [
+        'Consider waiting for all instances to reconnect',
+        'If urgent, document changes made during isolation',
+        'Monitor for conflicts after reconnection'
+      ]
+    };
+  }
 }
 
 module.exports = ClusterHealth;
