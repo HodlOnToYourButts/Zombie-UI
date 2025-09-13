@@ -50,7 +50,7 @@ async function showUserSessions(userId) {
     modal.show();
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}/sessions`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}/sessions`, {
             credentials: 'same-origin'
         });
         const result = await response.json();
@@ -115,7 +115,7 @@ async function toggleUser(userId, enabled) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}/toggle`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}/toggle`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -151,7 +151,7 @@ async function deleteUser(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -177,7 +177,7 @@ async function invalidateSessionFromModal(sessionId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
+        const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

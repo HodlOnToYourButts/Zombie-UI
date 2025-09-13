@@ -37,7 +37,7 @@ async function toggleUser(userId, enabled) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${userId}/toggle`, {
+        const response = await fetch(`/api/users/${userId}/toggle`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -64,7 +64,7 @@ async function deleteUser(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${userId}`, {
+        const response = await fetch(`/api/users/${userId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ async function deleteUser(userId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/admin/users?message=User deleted successfully&messageType=success';
+            window.location.href = '/users?message=User deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }
@@ -94,7 +94,7 @@ async function resetPassword(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${userId}/password`, {
+        const response = await fetch(`/api/users/${userId}/password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -121,7 +121,7 @@ async function invalidateSession(sessionId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/sessions/${sessionId}/invalidate`, {
+        const response = await fetch(`/api/sessions/${sessionId}/invalidate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -143,7 +143,7 @@ async function invalidateSession(sessionId) {
 
 async function showAllSessions(userId) {
     try {
-        const response = await fetch(`/admin/api/users/${userId}/sessions`);
+        const response = await fetch(`/api/users/${userId}/sessions`);
         const result = await response.json();
         
         if (result.success) {

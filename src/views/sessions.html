@@ -96,7 +96,7 @@
                                 <i class="bi bi-cloud-slash"></i> Isolated
                             </span>
                             {{else if (eq this.syncStatus "conflict")}}
-                            <a href="/admin/conflicts/session/{{this.id}}" class="badge bg-primary text-decoration-none" title="Has conflicts - click to view details">
+                            <a href="/conflicts/session/{{this.id}}" class="badge bg-primary text-decoration-none" title="Has conflicts - click to view details">
                                 <i class="bi bi-exclamation-triangle"></i> Conflict
                             </a>
                             {{else if (eq this.syncStatus "error")}}

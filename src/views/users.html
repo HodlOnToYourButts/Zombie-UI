@@ -36,7 +36,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0"><i class="bi bi-people"></i> User Management</h4>
-        <a href="/admin/users/new" class="btn btn-primary">
+        <a href="/users/new" class="btn btn-primary">
             <i class="bi bi-person-plus"></i> Add User
         </a>
     </div>
@@ -95,7 +95,7 @@
                                 <i class="bi bi-cloud-slash"></i> Isolated
                             </span>
                             {{else if (eq this.syncStatus "conflict")}}
-                            <a href="/admin/conflicts/user/{{this.id}}" class="badge bg-primary text-decoration-none" title="Has conflicts - click to view details">
+                            <a href="/conflicts/user/{{this.id}}" class="badge bg-primary text-decoration-none" title="Has conflicts - click to view details">
                                 <i class="bi bi-exclamation-triangle"></i> Conflict
                             </a>
                             {{else if (eq this.syncStatus "error")}}
@@ -117,10 +117,10 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="/admin/users/{{this.id}}" class="btn btn-outline-primary" title="View">
+                                <a href="/users/{{this.id}}" class="btn btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="/admin/users/{{this.id}}/edit" class="btn btn-outline-warning" title="Edit">
+                                <a href="/users/{{this.id}}/edit" class="btn btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <button class="btn btn-outline-info" data-action="show-sessions" data-user-id="{{this.id}}" title="Sessions">
@@ -148,7 +148,7 @@
                     {{else}}
                     <tr>
                         <td colspan="9" class="text-center py-4 text-muted">
-                            No users found. <a href="/admin/users/new">Create the first user</a>
+                            No users found. <a href="/users/new">Create the first user</a>
                         </td>
                     </tr>
                     {{/each}}

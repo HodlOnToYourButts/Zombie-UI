@@ -34,7 +34,7 @@ async function toggleClient(clientId, enabled) {
     }
     
     try {
-        const response = await fetch(`/admin/api/clients/${encodeURIComponent(clientId)}/toggle`, {
+        const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}/toggle`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -61,7 +61,7 @@ async function regenerateClientSecret(clientId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/clients/${encodeURIComponent(clientId)}/regenerate-secret`, {
+        const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}/regenerate-secret`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -88,7 +88,7 @@ async function deleteClient(clientId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/clients/${encodeURIComponent(clientId)}`, {
+        const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ async function deleteClient(clientId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/admin/clients?message=Client deleted successfully&messageType=success';
+            window.location.href = '/clients?message=Client deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }

@@ -5,14 +5,14 @@
                 <i class="bi bi-person-{{#if user}}gear{{else}}plus{{/if}}"></i> 
                 {{#if user}}Edit User{{else}}Add User{{/if}}
             </h2>
-            <a href="/admin/users" class="btn btn-secondary">
+            <a href="/users" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Users
             </a>
         </div>
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/admin/users{{#if user}}/{{encodeURIComponent user.id}}{{/if}}">
+                <form method="POST" action="/users{{#if user}}/{{encodeURIComponent user.id}}{{/if}}">
                     {{#if user}}
                     <input type="hidden" name="_method" value="PUT">
                     {{/if}}
@@ -111,7 +111,7 @@
                             <i class="bi bi-check-lg"></i> 
                             {{#if user}}Update User{{else}}Create User{{/if}}
                         </button>
-                        <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+                        <a href="/users" class="btn btn-secondary">Cancel</a>
                         {{#if user}}
                         <button type="button" class="btn btn-warning ms-auto" data-action="reset-password" data-user-id="{{user.id}}">
                             <i class="bi bi-key"></i> Reset Password

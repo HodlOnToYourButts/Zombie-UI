@@ -36,7 +36,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0"><i class="bi bi-gear"></i> Client Management</h4>
-        <a href="/admin/clients/new" class="btn btn-primary">
+        <a href="/clients/new" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Add Client
         </a>
     </div>
@@ -116,10 +116,10 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="/admin/clients/{{this.id}}" class="btn btn-outline-primary" title="View Details">
+                                <a href="/clients/{{this.id}}" class="btn btn-outline-primary" title="View Details">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="/admin/clients/{{this.id}}/edit" class="btn btn-outline-warning" title="Edit">
+                                <a href="/clients/{{this.id}}/edit" class="btn btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 {{#if this.enabled}}
@@ -147,7 +147,7 @@
                     {{else}}
                     <tr>
                         <td colspan="9" class="text-center py-4 text-muted">
-                            No clients found. <a href="/admin/clients/new">Create the first client</a>
+                            No clients found. <a href="/clients/new">Create the first client</a>
                         </td>
                     </tr>
                     {{/each}}

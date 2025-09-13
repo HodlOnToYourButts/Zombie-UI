@@ -44,7 +44,7 @@ async function resetPassword(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}/password`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}/password`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -67,7 +67,7 @@ async function resetPassword(userId) {
 
 async function showUserSessions(userId) {
     // For now, redirect to user details page which shows sessions
-    window.location.href = `/admin/users/${encodeURIComponent(userId)}`;
+    window.location.href = `/users/${encodeURIComponent(userId)}`;
 }
 
 async function invalidateUserSessions(userId) {
@@ -76,7 +76,7 @@ async function invalidateUserSessions(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}/sessions/invalidate`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}/sessions/invalidate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -102,7 +102,7 @@ async function deleteUser(userId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/users/${encodeURIComponent(userId)}`, {
+        const response = await fetch(`/api/users/${encodeURIComponent(userId)}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -113,7 +113,7 @@ async function deleteUser(userId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/admin/users?message=User deleted successfully&messageType=success';
+            window.location.href = '/users?message=User deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }

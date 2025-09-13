@@ -5,14 +5,14 @@
                 <i class="bi bi-gear-{{#if client}}fill{{else}}plus{{/if}}"></i> 
                 {{#if client}}Edit Client{{else}}Add Client{{/if}}
             </h2>
-            <a href="/admin/clients" class="btn btn-secondary">
+            <a href="/clients" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Clients
             </a>
         </div>
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/admin/clients{{#if client}}/{{encodeURIComponent client.id}}{{/if}}">
+                <form method="POST" action="/clients{{#if client}}/{{encodeURIComponent client.id}}{{/if}}">
                     {{#if client}}
                     <input type="hidden" name="_method" value="PUT">
                     {{/if}}
@@ -92,7 +92,7 @@
                             <i class="bi bi-check-lg"></i> 
                             {{#if client}}Update Client{{else}}Create Client{{/if}}
                         </button>
-                        <a href="/admin/clients" class="btn btn-secondary">Cancel</a>
+                        <a href="/clients" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

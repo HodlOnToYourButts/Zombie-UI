@@ -120,24 +120,24 @@ function displayClusterNavStatus(health, contentElement) {
         statusIcon = 'exclamation-triangle-fill';
     }
     
-    // Calculate cluster uptime or downtime
-    let timeLabel = 'Uptime';
-    let timeValue = 'Unknown';
+    // Calculate cluster uptime or downtime based on instance status
+    let timeLabel = 'Network';
+    let timeValue = 'Active';
     
     if (summary.unhealthy === 0) {
-        // All nodes healthy - show uptime
-        if (health.clusterUptime && health.clusterUptime.fullySyncedSince && health.clusterUptime.uptimeMs > 0) {
-            const uptimeSeconds = Math.floor(health.clusterUptime.uptimeMs / 1000);
-            timeValue = formatDuration(uptimeSeconds);
-        }
+        // All instances healthy - show network as healthy
+        timeLabel = 'Network';
+        timeValue = 'Healthy';
     } else {
-        // Some nodes down - show downtime using isolation timestamp
-        timeLabel = 'Downtime';
-        if (health.isolationInfo && health.isolationInfo.isolated && health.isolationInfo.since) {
-            const isolatedSince = new Date(health.isolationInfo.since);
+        // Some instances down - show downtime using isolation timestamp
+        timeLabel = 'Network';
+        if (health.isolationInfo && health.isolationInfo.isIsolated && health.isolationInfo.isolationStartTime) {
+            const isolatedSince = new Date(health.isolationInfo.isolationStartTime);
             const downtimeMs = new Date() - isolatedSince;
             const downtimeSeconds = Math.floor(downtimeMs / 1000);
-            timeValue = formatDuration(downtimeSeconds);
+            timeValue = `Issues (${formatDuration(downtimeSeconds)})`;
+        } else {
+            timeValue = 'Issues';
         }
     }
     
@@ -160,7 +160,7 @@ function displayClusterNavStatus(health, contentElement) {
         <div class="cluster-status-container">
             <span class="text-${statusColor} cluster-status-basic" style="line-height: 1; display: inline-flex; align-items: center;">
                 <i class="bi bi-${statusIcon}" style="font-size: 1rem;"></i>
-                <span class="fw-bold ms-1" style="font-size: 0.8rem;">${summary.healthy}/${summary.total} nodes</span>
+                <span class="fw-bold ms-1" style="font-size: 0.8rem;">${summary.healthy}/${summary.total} instances</span>
             </span>
             <div class="cluster-status-details position-absolute bg-dark border rounded p-2 shadow-sm" style="display: none; top: 100%; right: 0; white-space: nowrap; z-index: 1000;">
                 <div class="text-light" style="font-size: 0.75rem;">

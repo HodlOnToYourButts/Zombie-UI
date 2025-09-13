@@ -46,7 +46,7 @@ async function clearInactiveSessions() {
     }
     
     try {
-        const response = await fetch('/admin/api/sessions/clear-inactive', {
+        const response = await fetch('/api/sessions/clear-inactive', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -73,7 +73,7 @@ async function clearAllSessions() {
     }
     
     try {
-        const response = await fetch('/admin/api/sessions/clear-all', {
+        const response = await fetch('/api/sessions/clear-all', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -87,7 +87,7 @@ async function clearAllSessions() {
             alert(`Successfully cleared ${result.count} sessions.`);
             if (result.adminSessionCleared) {
                 // Admin session was cleared, redirect to login
-                window.location.href = '/admin/login';
+                window.location.href = '/auth';
             } else {
                 location.reload();
             }
@@ -101,7 +101,7 @@ async function clearAllSessions() {
 
 async function viewSessionDetails(sessionId) {
     try {
-        const response = await fetch(`/admin/api/sessions/${encodeURIComponent(sessionId)}`, {
+        const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -183,7 +183,7 @@ async function invalidateSession(sessionId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
+        const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}/invalidate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -210,7 +210,7 @@ async function deleteSession(sessionId) {
     }
     
     try {
-        const response = await fetch(`/admin/api/sessions/${encodeURIComponent(sessionId)}`, {
+        const response = await fetch(`/api/sessions/${encodeURIComponent(sessionId)}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
