@@ -6,12 +6,12 @@ function getAdminClientConfig(req) {
   const host = req.get('host') || 'localhost:3000';
   const instanceId = process.env.INSTANCE_ID || 'default';
   
-  const clientId = process.env.CLIENT_ID;
+  const clientId = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
   console.log(`DEBUG: OIDC getAdminClientConfig using client_id: ${clientId}`);
   
   return {
     client_id: clientId,
-    client_secret: process.env.CLIENT_SECRET || 'client-secret-change-in-production',
+    client_secret: process.env.ZOMBIEAUTH_ADMIN_CLIENT_SECRET,
     redirect_uri: `${protocol}://${host}/callback`,
     post_logout_redirect_uri: `${protocol}://${host}/login`,
     response_types: ['code'],
@@ -22,12 +22,12 @@ function getAdminClientConfig(req) {
 }
 
 // Static OIDC Client configuration for database initialization
-const clientIdForConfig = process.env.CLIENT_ID;
+const clientIdForConfig = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
 console.log(`DEBUG: ADMIN_CLIENT_CONFIG using client_id: ${clientIdForConfig}`);
 
 const ADMIN_CLIENT_CONFIG = {
   client_id: clientIdForConfig,
-  client_secret: process.env.CLIENT_SECRET || 'client-secret-change-in-production',
+  client_secret: process.env.ZOMBIEAUTH_ADMIN_CLIENT_SECRET,
   redirect_uri: process.env.REDIRECT_URI || 'http://localhost:4000/callback',
   post_logout_redirect_uri: process.env.LOGOUT_REDIRECT_URI || 'http://localhost:4000/login',
   response_types: ['code'],
