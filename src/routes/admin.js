@@ -499,9 +499,9 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     });
     
     // Sort clients to pin default client to the top
-    const defaultClientId = process.env.CLIENT_ID;
+    const defaultClientId = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
     if (!defaultClientId) {
-      throw new Error('CLIENT_ID environment variable must be set for security');
+      throw new Error('ZOMBIEAUTH_ADMIN_CLIENT_ID environment variable must be set for security');
     }
     const sortedClients = clients.sort((a, b) => {
       if (a.clientId === defaultClientId) return -1;
