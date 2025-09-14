@@ -13,7 +13,7 @@ function getAdminClientConfig(req) {
     client_id: clientId,
     client_secret: process.env.ZOMBIEAUTH_ADMIN_CLIENT_SECRET,
     redirect_uri: `${protocol}://${host}/callback`,
-    post_logout_redirect_uri: `${protocol}://${host}/login`,
+    post_logout_redirect_uri: `${protocol}://${host}/`,
     response_types: ['code'],
     grant_types: ['authorization_code', 'refresh_token'],
     scope: 'openid profile email',
@@ -21,20 +21,6 @@ function getAdminClientConfig(req) {
   };
 }
 
-// Static OIDC Client configuration for database initialization
-const clientIdForConfig = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
-console.log(`DEBUG: ADMIN_CLIENT_CONFIG using client_id: ${clientIdForConfig}`);
-
-const ADMIN_CLIENT_CONFIG = {
-  client_id: clientIdForConfig,
-  client_secret: process.env.ZOMBIEAUTH_ADMIN_CLIENT_SECRET,
-  redirect_uri: process.env.REDIRECT_URI || 'http://localhost:4000/callback',
-  post_logout_redirect_uri: process.env.LOGOUT_REDIRECT_URI || 'http://localhost:4000/login',
-  response_types: ['code'],
-  grant_types: ['authorization_code', 'refresh_token'],
-  scope: 'openid profile email',
-  token_endpoint_auth_method: 'client_secret_basic'
-};
 
 // OIDC endpoints
 const getOidcEndpoints = (baseUrl = process.env.ISSUER || 'http://localhost:3000') => {
@@ -57,7 +43,6 @@ const getOidcEndpoints = (baseUrl = process.env.ISSUER || 'http://localhost:3000
 };
 
 module.exports = {
-  ADMIN_CLIENT_CONFIG,
   getAdminClientConfig,
   getOidcEndpoints
 };
