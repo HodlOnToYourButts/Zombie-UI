@@ -11,8 +11,9 @@
 # - zombieauth user must have admin access to zombieauth database
 #
 # Required environment variables:
-# - COUCHDB_HOST (default: localhost)
-# - COUCHDB_PORT (default: 5984)
+# - COUCHDB_URL (optional: complete CouchDB URL, overrides HOST/PORT)
+# - COUCHDB_HOST (default: localhost, ignored if COUCHDB_URL is set)
+# - COUCHDB_PORT (default: 5984, ignored if COUCHDB_URL is set)
 # - COUCHDB_USER (default: zombieauth)
 # - COUCHDB_PASSWORD
 # - COUCHDB_DATABASE (default: zombieauth)
@@ -49,8 +50,13 @@ ZOMBIEAUTH_ADMIN_USERNAME="${ZOMBIEAUTH_ADMIN_USERNAME:-}"
 ZOMBIEAUTH_ADMIN_PASSWORD="${ZOMBIEAUTH_ADMIN_PASSWORD:-}"
 ZOMBIEAUTH_ADMIN_EMAIL="${ZOMBIEAUTH_ADMIN_EMAIL:-${ZOMBIEAUTH_ADMIN_USERNAME}@zombieauth.local}"
 
-# Construct CouchDB URL
-COUCHDB_URL="http://${COUCHDB_HOST}:${COUCHDB_PORT}"
+# Construct CouchDB URL (allow override with COUCHDB_URL)
+if [[ -n "$COUCHDB_URL" ]]; then
+    echo "Using provided COUCHDB_URL: ${COUCHDB_URL}"
+else
+    COUCHDB_URL="http://${COUCHDB_HOST}:${COUCHDB_PORT}"
+    echo "Constructed COUCHDB_URL from host/port: ${COUCHDB_URL}"
+fi
 
 # Validation
 echo "🔍 Validating environment variables..."
