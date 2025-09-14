@@ -17,16 +17,13 @@ const PRODUCTION_FORBIDDEN_DEFAULTS = [
   // 'admin' removed - allowing admin username in production
 ];
 
-// Minimum security requirements
+// Minimum security requirements for runtime environment variables
 const SECURITY_REQUIREMENTS = {
-  ADMIN_USERNAME: { minLength: process.env.NODE_ENV === 'development' ? 3 : 5, pattern: /^[a-zA-Z0-9_-]+$/ },
-  ADMIN_PASSWORD: { minLength: process.env.NODE_ENV === 'development' ? 3 : 12, requireComplex: false },
   COUCHDB_USER: { minLength: 5, pattern: /^[a-zA-Z0-9_-]+$/ },
   COUCHDB_PASSWORD: { minLength: 12, requireComplex: false },
-  SESSION_SECRET: { minLength: 32, entropy: 'high' },
-  CLIENT_SECRET: { minLength: 32, entropy: 'high' },
-  COUCHDB_SECRET: { minLength: 32, entropy: 'high' },
-  CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
+  ZOMBIEAUTH_ADMIN_SESSION_SECRET: { minLength: 32, entropy: 'high' },
+  ZOMBIEAUTH_ADMIN_CLIENT_SECRET: { minLength: 32, entropy: 'high' },
+  ZOMBIEAUTH_ADMIN_CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
 };
 
 function validateSecurityConfiguration() {
