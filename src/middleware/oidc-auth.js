@@ -53,7 +53,14 @@ function redirectToLogin(req, res) {
         console.error('Error saving session before OIDC redirect:', err);
         return res.status(500).send('Session error');
       }
-      res.redirect(authUrl);
+      console.log('Session saved successfully before redirect');
+      console.log('- Final session state:', req.session.oidc_state);
+      console.log('- Final session code verifier length:', req.session.oidc_code_verifier?.length);
+
+      // Add a small delay to ensure session is fully persisted
+      setTimeout(() => {
+        res.redirect(authUrl);
+      }, 50);
     });
   } catch (error) {
     console.error('Error redirecting to OIDC login:', error);
@@ -72,27 +79,32 @@ async function handleCallback(req, res) {
     console.log('- Session ID:', req.sessionID);
     console.log('- Session keys:', Object.keys(req.session || {}));
 
-    // If session data is missing, try to reload the session to handle race conditions
+    // If session data is missing, handle the race condition more gracefully
     if (!req.session.oidc_state && state) {
-      console.log('Session state missing, attempting to reload session...');
-      return new Promise((resolve) => {
-        req.session.reload((err) => {
-          if (err) {
-            console.error('Session reload failed:', err);
-            return res.status(400).send('Session error - please try logging in again');
-          }
-          console.log('Session reloaded, retrying callback...');
-          console.log('- Reloaded session oidc_state:', req.session.oidc_state);
-          console.log('- Reloaded session keys:', Object.keys(req.session || {}));
+      console.log('Session state missing, this may be a race condition...');
+      console.log('- Session store type:', req.session.constructor.name);
+      console.log('- Session cookie present:', !!req.headers.cookie);
 
-          // Retry the callback processing after session reload
-          handleCallback(req, res).then(resolve).catch((error) => {
-            console.error('Callback retry failed:', error);
-            res.status(500).send('Authentication error');
-            resolve();
-          });
+      // Instead of reloading (which fails with MemoryStore), wait briefly and retry
+      console.log('Waiting 100ms and retrying callback...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if session data appeared after brief wait
+      if (!req.session.oidc_state) {
+        console.error('Session data still missing after wait. Possible causes:');
+        console.error('1. Session not properly saved during redirect');
+        console.error('2. Session cookie not being sent');
+        console.error('3. Different session ID between requests');
+
+        // Clear any partial session data and redirect to start over
+        req.session.destroy((err) => {
+          if (err) console.error('Session destroy error:', err);
+          return res.redirect('/auth');
         });
-      });
+        return;
+      }
+
+      console.log('Session data appeared after wait, continuing...');
     }
 
     // Verify state parameter for CSRF protection
