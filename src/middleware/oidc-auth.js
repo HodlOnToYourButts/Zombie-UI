@@ -122,7 +122,11 @@ async function handleCallback(req, res) {
     
     const clientConfig = getAdminClientConfig(req);
     const endpoints = getOidcEndpoints();
-    
+
+    // Wait 3 seconds before token exchange to ensure everything is settled
+    console.log('Waiting 3 seconds before token exchange...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     // Exchange authorization code for tokens
     const tokenParams = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -132,7 +136,7 @@ async function handleCallback(req, res) {
       client_secret: clientConfig.client_secret,
       code_verifier: req.session.oidc_code_verifier
     });
-    
+
     console.log('Exchanging code for tokens at:', endpoints.token_endpoint);
     
     const tokenResponse = await fetch(endpoints.token_endpoint, {
