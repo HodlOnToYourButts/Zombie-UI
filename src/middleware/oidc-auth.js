@@ -71,7 +71,30 @@ async function handleCallback(req, res) {
     console.log('- Session oidc_state:', req.session.oidc_state);
     console.log('- Session ID:', req.sessionID);
     console.log('- Session keys:', Object.keys(req.session || {}));
-    
+
+    // If session data is missing, try to reload the session to handle race conditions
+    if (!req.session.oidc_state && state) {
+      console.log('Session state missing, attempting to reload session...');
+      return new Promise((resolve) => {
+        req.session.reload((err) => {
+          if (err) {
+            console.error('Session reload failed:', err);
+            return res.status(400).send('Session error - please try logging in again');
+          }
+          console.log('Session reloaded, retrying callback...');
+          console.log('- Reloaded session oidc_state:', req.session.oidc_state);
+          console.log('- Reloaded session keys:', Object.keys(req.session || {}));
+
+          // Retry the callback processing after session reload
+          handleCallback(req, res).then(resolve).catch((error) => {
+            console.error('Callback retry failed:', error);
+            res.status(500).send('Authentication error');
+            resolve();
+          });
+        });
+      });
+    }
+
     // Verify state parameter for CSRF protection
     if (!state || state !== req.session.oidc_state) {
       console.error('Invalid state parameter - state mismatch');
