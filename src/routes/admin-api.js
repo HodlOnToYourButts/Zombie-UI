@@ -299,7 +299,7 @@ router.post('/clients/:id/toggle', oidcAuth.requireOidcAuth('admin'), async (req
     }
     
     // Don't allow disabling the default admin client
-    if (client.clientId === 'zombieauth' && !req.body.enabled) {
+    if (client.clientId === 'zombie' && !req.body.enabled) {
       return res.json({ success: false, error: 'Cannot disable the default client' });
     }
     
@@ -362,7 +362,7 @@ router.delete('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res
     }
     
     // Don't allow deleting the default admin client
-    if (client.clientId === 'zombieauth') {
+    if (client.clientId === 'zombie') {
       return res.json({ success: false, error: 'Cannot delete the default client' });
     }
     

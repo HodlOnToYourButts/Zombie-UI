@@ -77,7 +77,7 @@ async function deleteUser(userId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/users?message=User deleted successfully&messageType=success';
+            window.location.href = '/admin/users?message=User deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }

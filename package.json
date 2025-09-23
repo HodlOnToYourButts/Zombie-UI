@@ -1,7 +1,7 @@
 {
-  "name": "zombieauth-admin",
+  "name": "zombie-ui",
   "version": "1.0.0",
-  "description": "ZombieAuth administration interface",
+  "description": "Zombie administration and user self-management interface",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -10,7 +10,7 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["admin", "interface", "oauth2", "openid-connect", "authentication", "couchdb", "web-ui"],
+  "keywords": ["admin", "interface", "oauth2", "openid-connect", "authentication", "couchdb", "web-ui", "self-service", "user-management"],
   "author": "HodlOnToYourButts <jholz88@protonmail.com>",
   "license": "AGPL-3.0",
   "dependencies": {

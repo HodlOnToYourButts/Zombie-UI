@@ -102,7 +102,7 @@ async function deleteClient(clientId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/clients?message=Client deleted successfully&messageType=success';
+            window.location.href = '/admin/clients?message=Client deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }

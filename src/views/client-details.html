@@ -9,7 +9,7 @@
                     <a href="/clients/{{encodeURIComponent client.id}}/edit" class="btn btn-warning">
                         <i class="bi bi-pencil"></i> Edit Client
                     </a>
-                    <a href="/clients" class="btn btn-secondary">
+                    <a href="/admin/clients" class="btn btn-secondary">
                         <i class="bi bi-arrow-left"></i> Back to Clients
                     </a>
                 </div>
@@ -152,7 +152,7 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {{#if client.enabled}}
-                    {{#unless (eq client.clientId "zombieauth")}}
+                    {{#unless (eq client.clientId "zombie")}}
                     <button class="btn btn-warning btn-sm" data-action="toggle-client" data-client-id="{{client.id}}" data-enabled="false">
                         <i class="bi bi-pause"></i> Disable Client
                     </button>
@@ -165,7 +165,7 @@
                     <button class="btn btn-info btn-sm" data-action="regenerate-secret" data-client-id="{{client.id}}">
                         <i class="bi bi-arrow-clockwise"></i> Regenerate Secret
                     </button>
-                    {{#unless (eq client.clientId "zombieauth")}}
+                    {{#unless (eq client.clientId "zombie")}}
                     <hr>
                     <button class="btn btn-danger btn-sm" data-action="delete-client" data-client-id="{{client.id}}">
                         <i class="bi bi-trash"></i> Delete Client

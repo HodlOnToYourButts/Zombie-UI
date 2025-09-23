@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Zombie UI Application
+  zombie-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zombie-ui
+    env_file:
+      - .env.docker  # Use Docker-specific environment file
+    ports:
+      - "18080:8080"  # Publish UI on port 18080
+    volumes:
+      # Mount source code for development (remove in production)
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./node_modules:/app/node_modules
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      - replication-monitor
+
+  # Replication Monitor Service
+  replication-monitor:
+    image: ghcr.io/hodlontoyourbutts/replication-monitor:latest
+    container_name: replication-monitor
+    env_file:
+      - .env.docker  # Use same Docker environment file
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Zombie UI Setup Container
+  zombie-ui-setup:
+    image: docker.io/alpine:latest
+    container_name: zombie-ui-setup
+    environment:
+      - COUCHDB_URL=http://couchdb:5984
+      - COUCHDB_DATABASE=zombie
+      - COUCHDB_USER=zombie
+      - COUCHDB_PASSWORD=zombie
+    depends_on:
+      - replication-monitor
+    restart: "no"
+    volumes:
+      - ./scripts:/scripts
+    command: sh -c "apk add --no-cache curl && /scripts/zombie-ui-setup.sh"
+
+networks:
+  default:
+    name: development

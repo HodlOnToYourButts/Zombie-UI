@@ -68,7 +68,7 @@ async function resetPassword(userId) {
 
 async function showUserSessions(userId) {
     // For now, redirect to user details page which shows sessions
-    window.location.href = `/users/${encodeURIComponent(userId)}`;
+    window.location.href = `/admin/users/${encodeURIComponent(userId)}`;
 }
 
 async function invalidateUserSessions(userId) {
@@ -116,7 +116,7 @@ async function deleteUser(userId) {
         const result = await response.json();
         
         if (result.success) {
-            window.location.href = '/users?message=User deleted successfully&messageType=success';
+            window.location.href = '/admin/users?message=User deleted successfully&messageType=success';
         } else {
             alert('Error: ' + result.error);
         }

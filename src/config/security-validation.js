@@ -21,17 +21,24 @@ const PRODUCTION_FORBIDDEN_DEFAULTS = [
 const SECURITY_REQUIREMENTS = {
   COUCHDB_USER: { minLength: 5, pattern: /^[a-zA-Z0-9_-]+$/ },
   COUCHDB_PASSWORD: { minLength: 12, requireComplex: false },
-  ZOMBIEAUTH_ADMIN_SESSION_SECRET: { minLength: 32, entropy: 'high' },
-  ZOMBIEAUTH_ADMIN_CLIENT_SECRET: { minLength: 32, entropy: 'high' },
-  ZOMBIEAUTH_ADMIN_CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
+  ZOMBIE_ADMIN_SESSION_SECRET: { minLength: 32, entropy: 'high' },
+  ZOMBIE_ADMIN_CLIENT_SECRET: { minLength: 32, entropy: 'high' },
+  ZOMBIE_ADMIN_CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
 };
 
 function validateSecurityConfiguration() {
   console.log('🔐 Validating security configuration...');
-  
+
+  // Check for development mode bypass
+  if (process.env.DEVELOPMENT_MODE === 'true') {
+    console.log('🚧 DEVELOPMENT_MODE enabled - relaxed security validation');
+    console.log('⚠️  This mode should NEVER be used in production!');
+    return validateDevelopmentMode();
+  }
+
   const errors = [];
   const warnings = [];
-  
+
   // Check required environment variables
   const requiredVars = Object.keys(SECURITY_REQUIREMENTS);
   
@@ -78,12 +85,12 @@ function validateSecurityConfiguration() {
     }
   }
   
-  // Additional security checks
+  // Additional security checks - test endpoints are now controlled by DEVELOPMENT_MODE
   if (process.env.ENABLE_TEST_ENDPOINTS === 'true') {
     if (process.env.NODE_ENV === 'production') {
       errors.push('❌ ENABLE_TEST_ENDPOINTS must not be true in production');
     } else {
-      warnings.push('⚠️  Test endpoints are enabled - ensure this is disabled in production');
+      warnings.push('⚠️  Test endpoints are enabled via legacy ENABLE_TEST_ENDPOINTS - consider using DEVELOPMENT_MODE instead');
     }
   }
   
@@ -147,6 +154,43 @@ function hasHighEntropy(value) {
   // If any character appears more than 20% of the time, likely low entropy
   const maxCount = Math.max(...Object.values(charCounts));
   return maxCount / value.length < 0.2;
+}
+
+function validateDevelopmentMode() {
+  const errors = [];
+  const warnings = [];
+
+  // Only check that required variables are present, allow insecure values
+  const requiredVars = Object.keys(SECURITY_REQUIREMENTS);
+
+  for (const varName of requiredVars) {
+    const value = process.env[varName];
+
+    if (!value) {
+      errors.push(`❌ ${varName} environment variable is required but not set`);
+    } else {
+      warnings.push(`🚧 ${varName} is set (development mode - security checks relaxed)`);
+    }
+  }
+
+  // Prevent development mode in production
+  if (process.env.NODE_ENV === 'production') {
+    errors.push('❌ DEVELOPMENT_MODE must not be true when NODE_ENV=production');
+  }
+
+  if (errors.length > 0) {
+    console.log('\n🚨 DEVELOPMENT MODE VALIDATION ERRORS:');
+    errors.forEach(error => console.log(error));
+    throw new Error(`Development mode validation failed with ${errors.length} errors`);
+  }
+
+  if (warnings.length > 0) {
+    console.log('\n🚧 Development mode status:');
+    warnings.forEach(warning => console.log(warning));
+  }
+
+  console.log('✅ Development mode validation passed');
+  return true;
 }
 
 module.exports = {

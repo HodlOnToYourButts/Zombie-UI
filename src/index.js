@@ -19,6 +19,7 @@ const csrf = require('csurf');
 const database = require('./database');
 const adminRoutes = require('./routes/admin');
 const adminApiRoutes = require('./routes/admin-api');
+const userRoutes = require('./routes/user');
 const sessionManager = require('./utils/session-manager');
 
 const app = express();
@@ -51,10 +52,10 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', ['127.0.0.1', '::1']); // Trust localhost only in development
 }
 
-// View engine setup
-app.engine('html', engine({ 
+// View engine setup with dynamic layout support
+app.engine('html', engine({
   extname: '.html',
-  defaultLayout: 'layout',
+  defaultLayout: false, // We'll set layout dynamically
   layoutsDir: path.join(__dirname, 'views'),
   partialsDir: path.join(__dirname, 'views/partials'),
   helpers: {
@@ -69,6 +70,9 @@ app.engine('html', engine({
     },
     eq: (a, b) => {
       return a === b;
+    },
+    not: (value) => {
+      return !value;
     }
   }
 }));
@@ -115,7 +119,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' })); // Limit payload size
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(sanitizeInput); // Sanitize all inputs
-app.use(methodOverride(function (req, res) {
+app.use(methodOverride(function (req, _res) {
   if (req.body && typeof req.body === 'object' && '_method' in req.body) {
     // Look in urlencoded POST bodies and delete it
     const method = req.body._method;
@@ -130,8 +134,8 @@ const sessionStore = new session.MemoryStore();
 sessionManager.setSessionStore(sessionStore);
 
 app.use(session({
-  name: `zombieauth-admin-session-${process.env.INSTANCE_ID || 'default'}`,
-  secret: process.env.ZOMBIEAUTH_ADMIN_SESSION_SECRET,
+  name: `zombie-admin-session-${process.env.INSTANCE_ID || 'default'}`,
+  secret: process.env.ZOMBIE_ADMIN_SESSION_SECRET,
   resave: false,
   saveUninitialized: true, // Changed to true to ensure session is created
   store: sessionStore,
@@ -143,13 +147,34 @@ app.use(session({
   }
 }));
 
+// OIDC routes (must be before CSRF protection to avoid interference)
+const oidcAuth = require('./middleware/oidc-auth');
+
+// OIDC authentication route (triggers login)
+app.get('/auth', (req, res) => {
+  oidcAuth.redirectToLogin(req, res);
+});
+
+// OIDC callback route (must be at root level for proper redirect URI)
+app.get('/callback', async (req, res) => {
+  console.log('🎯 CALLBACK ROUTE: Hit /callback route');
+  await oidcAuth.handleCallback(req, res);
+});
+
+// OIDC logout route (also at root level)
+app.get('/logout', (req, res) => {
+  oidcAuth.handleLogout(req, res);
+});
+
+console.log('✅ OIDC routes registered: /auth, /callback, /logout');
+
 // CSRF protection for form endpoints
-const csrfProtection = csrf({ 
+const csrfProtection = csrf({
   cookie: false, // Use session storage
   ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
 });
 
-// Apply CSRF protection to all admin routes
+// Apply CSRF protection to all routes (except OIDC routes above)
 app.use(csrfProtection);
 
 // Add CSRF token to templates
@@ -158,7 +183,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Add OIDC user to all templates (must be after session middleware)
+// Add OIDC user to all templates and set layout (must be after session middleware)
 app.use((req, res, next) => {
   console.log('Session middleware - path:', req.path);
   console.log('- Session ID:', req.sessionID);
@@ -166,9 +191,17 @@ app.use((req, res, next) => {
   console.log('- Session keys:', req.session ? Object.keys(req.session) : 'none');
   console.log('- Cookies:', req.headers.cookie || 'none');
   console.log('- OIDC user exists:', !!req.session?.oidc_user);
-  
+
   req.oidc_user = req.session?.oidc_user || null;
   res.locals.oidc_user = req.oidc_user;
+
+  // Set layout based on route
+  if (req.path.startsWith('/admin')) {
+    res.locals.layout = 'layout'; // Admin layout
+  } else {
+    res.locals.layout = 'user-layout'; // User layout (default)
+  }
+
   next();
 });
 
@@ -195,8 +228,9 @@ app.get('/health', async (req, res) => {
 });
 
 // Test endpoints for development and testing (disabled in production)
-if (process.env.ENABLE_TEST_ENDPOINTS === 'true') {
-  console.log('WARNING: Test endpoints enabled - disable in production by removing ENABLE_TEST_ENDPOINTS=true');
+if (process.env.DEVELOPMENT_MODE === 'true' || process.env.ENABLE_TEST_ENDPOINTS === 'true') {
+  const modeType = process.env.DEVELOPMENT_MODE === 'true' ? 'DEVELOPMENT_MODE' : 'ENABLE_TEST_ENDPOINTS (legacy)';
+  console.log(`WARNING: Test endpoints enabled via ${modeType} - disable in production`);
   
   // Test endpoint for conflict statistics
   app.get('/test/conflicts/stats', async (req, res) => {
@@ -265,9 +299,11 @@ if (process.env.NODE_ENV === 'production') {
   console.log('⚠️  Rate limiting disabled for development');
 }
 
-// Admin routes
+
+// Routes
 app.use('/api', adminApiRoutes);
-app.use('/', adminRoutes);
+app.use('/admin', adminRoutes);
+app.use('/', userRoutes);
 
 // Initialize database and start server
 async function startAdminServer() {

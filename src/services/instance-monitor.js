@@ -13,7 +13,7 @@ class InstanceMonitor {
     try {
       // Call the replication-monitor microservice
       const replicationMonitorUrl = process.env.REPLICATION_MONITOR_URL || 'http://replication-monitor:8080';
-      const response = await fetch(`${replicationMonitorUrl}/replication/status/zombieauth`);
+      const response = await fetch(`${replicationMonitorUrl}/replication/status/zombie`);
       
       if (!response.ok) {
         throw new Error(`Replication monitor service failed: ${response.status}`);

@@ -93,18 +93,55 @@ class Activity {
   // Static methods
   static async findRecent(limit = 10) {
     const db = database.getDb();
-    
+
     try {
       const result = await db.view('activities', 'by_timestamp', {
         include_docs: true,
         descending: true,
         limit: limit
       });
-      
+
       return result.rows.map(row => new Activity(row.doc));
     } catch (error) {
       if (error.statusCode === 404) {
         return [];
+      }
+      throw error;
+    }
+  }
+
+  static async findByUserId(userId, limit = 10) {
+    const db = database.getDb();
+
+    try {
+      // Try to find activities where this user is the target
+      const result = await db.view('activities', 'by_target_user', {
+        key: userId,
+        include_docs: true,
+        descending: true,
+        limit: limit
+      });
+
+      return result.rows.map(row => new Activity(row.doc));
+    } catch (error) {
+      if (error.statusCode === 404) {
+        // Fallback: search through all activities manually
+        try {
+          const allResult = await db.view('activities', 'by_timestamp', {
+            include_docs: true,
+            descending: true,
+            limit: 100 // Get more to filter
+          });
+
+          const userActivities = allResult.rows
+            .map(row => new Activity(row.doc))
+            .filter(activity => activity.targetUserId === userId || activity.adminUserId === userId)
+            .slice(0, limit);
+
+          return userActivities;
+        } catch (fallbackError) {
+          return [];
+        }
       }
       throw error;
     }

@@ -1,0 +1,196 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">My Profile</h1>
+        <p class="text-muted mb-0">Update your personal information</p>
+    </div>
+    <a href="/" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person"></i> Profile Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/profile">
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{user.username}}" readonly style="color: #495057; font-weight: 500;">
+                            <div class="form-text">Username cannot be changed</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <input type="email" class="form-control" id="email" value="{{user.email}}" readonly style="color: #495057; font-weight: 500;">
+                                {{#if user.emailVerified}}
+                                    <span class="input-group-text text-success">
+                                        <i class="bi bi-check-circle"></i>
+                                    </span>
+                                {{else}}
+                                    <span class="input-group-text text-warning">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </span>
+                                {{/if}}
+                            </div>
+                            <div class="form-text">
+                                {{#if user.emailVerified}}
+                                    Email is verified
+                                {{else}}
+                                    Email is not verified - contact administrator
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" value="{{user.firstName}}" maxlength="50">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" value="{{user.lastName}}" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Account Status</label>
+                            <div>
+                                {{#if user.enabled}}
+                                    <span class="badge bg-success">Enabled</span>
+                                {{else}}
+                                    <span class="badge bg-danger">Disabled</span>
+                                {{/if}}
+                            </div>
+                            <div class="form-text">Contact administrator to change account status</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Member Since</label>
+                            <div class="form-control-plaintext" style="color: #212529; font-weight: 500;">{{formatDate user.createdAt}}</div>
+                        </div>
+                    </div>
+
+                    {{#if user.groups.length}}
+                    <div class="mb-3">
+                        <label class="form-label">Groups</label>
+                        <div>
+                            {{#each user.groups}}
+                                <span class="badge bg-secondary me-1">{{this}}</span>
+                            {{/each}}
+                        </div>
+                        <div class="form-text">Group membership is managed by administrators</div>
+                    </div>
+                    {{/if}}
+
+                    {{#if user.roles.length}}
+                    <div class="mb-3">
+                        <label class="form-label">Roles</label>
+                        <div>
+                            {{#each user.roles}}
+                                <span class="badge bg-info me-1">{{this}}</span>
+                            {{/each}}
+                        </div>
+                        <div class="form-text">Roles are managed by administrators</div>
+                    </div>
+                    {{/if}}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Update Profile
+                        </button>
+                        <a href="/" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-check"></i> Security Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/change-password" class="btn btn-warning">
+                        <i class="bi bi-key"></i> Change Password
+                    </a>
+                    <a href="/sessions" class="btn btn-info">
+                        <i class="bi bi-activity"></i> Manage Sessions
+                    </a>
+                    <button type="button" class="btn btn-danger" onclick="revokeAllSessions()">
+                        <i class="bi bi-x-octagon"></i> Revoke All Sessions
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> Profile Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check text-success"></i>
+                        Keep your name information up to date
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check text-success"></i>
+                        Change your password regularly
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check text-success"></i>
+                        Monitor your active sessions
+                    </li>
+                    <li>
+                        <i class="bi bi-check text-success"></i>
+                        Contact admin for email or username changes
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function revokeAllSessions() {
+    if (!confirm('Are you sure you want to revoke all other sessions? This will log you out of all other devices but keep your current session active.')) {
+        return;
+    }
+
+    fetch('/sessions/revoke-all', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': window.csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/profile?message=' + encodeURIComponent(data.message) + '&messageType=success';
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error revoking sessions');
+    });
+}
+</script>

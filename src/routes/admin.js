@@ -43,18 +43,11 @@ router.get('/auth', (req, res) => {
   oidcAuth.redirectToLogin(req, res);
 });
 
-// OIDC callback handler
-router.get('/callback', async (req, res) => {
-  await oidcAuth.handleCallback(req, res);
-});
-
-// Admin logout
-router.get('/logout', (req, res) => {
-  oidcAuth.handleLogout(req, res);
-});
 
 // Admin dashboard
 router.get('/', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
+  console.log('🎯 ADMIN ROUTE: Root path hit - rendering admin dashboard');
+  console.log('🎯 ADMIN ROUTE: User roles:', req.oidc_user?.roles);
   try {
     const dbStatus = await database.testConnection();
     
@@ -499,9 +492,9 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     });
     
     // Sort clients to pin default client to the top
-    const defaultClientId = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
+    const defaultClientId = process.env.ZOMBIE_ADMIN_CLIENT_ID;
     if (!defaultClientId) {
-      throw new Error('ZOMBIEAUTH_ADMIN_CLIENT_ID environment variable must be set for security');
+      throw new Error('ZOMBIE_ADMIN_CLIENT_ID environment variable must be set for security');
     }
     const sortedClients = clients.sort((a, b) => {
       if (a.clientId === defaultClientId) return -1;

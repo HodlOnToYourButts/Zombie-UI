@@ -2,7 +2,7 @@ const nano = require('nano');
 
 class Database {
   constructor() {
-    const username = process.env.COUCHDB_USER || 'zombieauth';
+    const username = process.env.COUCHDB_USER || 'zombie';
     const password = process.env.COUCHDB_PASSWORD;
     const host = process.env.COUCHDB_HOST || 'localhost';
     const port = process.env.COUCHDB_PORT || '5984';
@@ -16,7 +16,7 @@ class Database {
     const couchUrl = `http://${host}:${port}`;
     this.couchUrl = couchUrl.replace('://', `://${username}:${password}@`);
     
-    this.dbName = process.env.COUCHDB_DATABASE || 'zombieauth';
+    this.dbName = process.env.COUCHDB_DATABASE || 'zombie';
     this.instanceId = process.env.INSTANCE_ID || 'default';
     
     // Use CouchDB for main operations
@@ -28,20 +28,170 @@ class Database {
     try {
       // Wait for CouchDB to be ready
       await this.waitForCouchDB();
-      
-      // Connect to existing database
+
+      // Try to connect to existing database
       this.db = this.client.db.use(this.dbName);
-      await this.db.info(); // Test if database exists and is accessible
-      
-      console.log(`Connected to CouchDB database: ${this.dbName} (Instance: ${this.instanceId})`);
+
+      try {
+        await this.db.info(); // Test if database exists and is accessible
+        console.log(`Connected to existing CouchDB database: ${this.dbName} (Instance: ${this.instanceId})`);
+      } catch (error) {
+        if (error.statusCode === 404) {
+          console.log(`Database '${this.dbName}' not found. Creating database and setting up views...`);
+          await this.setupDatabase();
+        } else {
+          throw error;
+        }
+      }
+
+      // Ensure views exist (in case database existed but views didn't)
+      await this.ensureViewsExist();
+
+      // In development mode, ensure admin user exists
+      if (process.env.DEVELOPMENT_MODE === 'true') {
+        await this.ensureAdminUserExists();
+      }
+
+      console.log(`✅ Database initialization complete: ${this.dbName}`);
       return true;
     } catch (error) {
-      if (error.statusCode === 404) {
-        console.error(`Database '${this.dbName}' not found. Please run the setup script first: scripts/setup-couchdb.sh`);
-      } else {
-        console.error('Failed to initialize database:', error.message);
-      }
+      console.error('Failed to initialize database:', error.message);
       throw error;
+    }
+  }
+
+  async setupDatabase() {
+    try {
+      console.log(`Creating database: ${this.dbName}`);
+      await this.client.db.create(this.dbName);
+
+      // Refresh the database connection
+      this.db = this.client.db.use(this.dbName);
+
+      console.log('✅ Database created successfully');
+    } catch (error) {
+      if (error.statusCode === 412) {
+        console.log('Database already exists, continuing...');
+        this.db = this.client.db.use(this.dbName);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  async ensureViewsExist() {
+    console.log('🔍 Ensuring CouchDB views exist...');
+
+    const views = {
+      users: {
+        by_email: 'function(doc) { if (doc.type === "user" && doc.email) { emit(doc.email, doc); } }',
+        by_username: 'function(doc) { if (doc.type === "user" && doc.username) { emit(doc.username, doc); } }'
+      },
+      sessions: {
+        by_user_id: 'function(doc) { if (doc.type === "session" && doc.userId) { emit(doc.userId, doc); } }',
+        by_auth_code: 'function(doc) { if (doc.type === "session" && doc.authorizationCode) { emit(doc.authorizationCode, doc); } }',
+        active_sessions: 'function(doc) { if (doc.type === "session" && doc.active) { emit(doc.userId, doc); } }'
+      },
+      activities: {
+        by_timestamp: 'function(doc) { if (doc.type === "activity" && doc.timestamp) { emit(doc.timestamp, doc); } }',
+        by_target_user: 'function(doc) { if (doc.type === "activity" && doc.targetUserId) { emit(doc.targetUserId, doc); } }'
+      },
+      clients: {
+        by_client_id: 'function(doc) { if (doc.type === "client" && doc.clientId) { emit(doc.clientId, doc); } }',
+        by_name: 'function(doc) { if (doc.type === "client" && doc.name) { emit(doc.name, doc); } }',
+        enabled_clients: 'function(doc) { if (doc.type === "client" && doc.enabled) { emit(doc.name, doc); } }'
+      }
+    };
+
+    for (const [designName, viewFunctions] of Object.entries(views)) {
+      await this.createDesignDoc(designName, viewFunctions);
+    }
+
+    console.log('✅ All views are available');
+  }
+
+  async createDesignDoc(designName, viewFunctions) {
+    const designDocId = `_design/${designName}`;
+
+    try {
+      // Check if design document already exists
+      await this.db.get(designDocId);
+      console.log(`📊 View already exists: ${designName}`);
+      return;
+    } catch (error) {
+      if (error.statusCode !== 404) {
+        throw error;
+      }
+    }
+
+    // Create the design document
+    const designDoc = {
+      _id: designDocId,
+      views: {}
+    };
+
+    for (const [viewName, mapFunction] of Object.entries(viewFunctions)) {
+      designDoc.views[viewName] = { map: mapFunction };
+    }
+
+    try {
+      await this.db.insert(designDoc);
+      console.log(`✅ Created view: ${designName}`);
+    } catch (error) {
+      console.error(`❌ Failed to create view ${designName}:`, error.message);
+      throw error;
+    }
+  }
+
+  async ensureAdminUserExists() {
+    console.log('🔍 Checking for admin user in development mode...');
+
+    try {
+      // Check if admin user already exists
+      const result = await this.db.view('users', 'by_username', {
+        key: 'admin',
+        include_docs: true
+      });
+
+      if (result.rows.length > 0) {
+        console.log('👤 Admin user already exists');
+        return;
+      }
+
+      console.log('👤 Creating development admin user (admin/admin)...');
+
+      // Import bcrypt for password hashing
+      const bcrypt = require('bcryptjs');
+      const passwordHash = await bcrypt.hash('admin', 12);
+
+      const adminUser = {
+        _id: `user_${require('crypto').randomBytes(12).toString('hex')}`,
+        type: 'user',
+        username: 'admin',
+        email: 'admin@zombie.local',
+        passwordHash: passwordHash,
+        firstName: 'System',
+        lastName: 'Administrator',
+        groups: ['admin'],
+        roles: ['admin', 'user'],
+        enabled: true,
+        emailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        instanceMetadata: {
+          lastModifiedBy: this.instanceId,
+          lastModifiedAt: new Date().toISOString(),
+          version: 1
+        }
+      };
+
+      await this.db.insert(adminUser);
+      console.log('✅ Development admin user created (username: admin, password: admin)');
+      console.log('⚠️  Remember to change these credentials in production!');
+
+    } catch (error) {
+      console.error('❌ Failed to create admin user:', error.message);
+      // Don't throw - this is a convenience feature, not critical
     }
   }
 

@@ -1,10 +1,10 @@
-# ZombieAuth Admin Interface
+# Zombie Admin Interface
 
-A web-based administration interface for managing ZombieAuth OAuth2/OpenID Connect servers and clusters.
+A web-based administration interface for managing Zombie OAuth2/OpenID Connect servers and clusters.
 
 ## Overview
 
-ZombieAuth Admin provides a comprehensive web interface for managing users, OAuth2 clients, sessions, and monitoring cluster health in ZombieAuth deployments. It's designed to work seamlessly with both single-node and multi-node CouchDB clusters.
+Zombie Admin provides a comprehensive web interface for managing users, OAuth2 clients, sessions, and monitoring cluster health in Zombie deployments. It's designed to work seamlessly with both single-node and multi-node CouchDB clusters.
 
 ## Features
 
@@ -50,7 +50,7 @@ The admin interface is configured via environment variables:
 - `PRIMARY_COUCHDB_URL` - Primary CouchDB server URL
 - `COUCHDB_USER` - CouchDB username for admin operations
 - `COUCHDB_PASSWORD` - CouchDB password
-- `COUCHDB_DATABASE` - ZombieAuth database name (default: zombieauth)
+- `COUCHDB_DATABASE` - Zombie database name (default: zombie)
 
 ### Authentication
 - `ADMIN_USERNAME` - Admin interface username
@@ -69,14 +69,14 @@ The admin interface is configured via environment variables:
 
 ```bash
 docker run -d \
-  --name zombieauth-admin \
+  --name zombie-admin \
   -p 8080:8080 \
   -e ADMIN_USERNAME=admin \
   -e ADMIN_PASSWORD=your-secure-password \
   -e PRIMARY_COUCHDB_URL=http://your-couchdb:5984 \
   -e COUCHDB_USER=admin \
   -e COUCHDB_PASSWORD=couchdb-password \
-  ghcr.io/hodlontoyourbutts/zombieauth-admin:latest
+  ghcr.io/hodlontoyourbutts/zombie-admin:latest
 ```
 
 ### Using Node.js
@@ -147,13 +147,13 @@ npm run lint
 npm run typecheck
 
 # Build Docker image
-docker build -t zombieauth-admin .
+docker build -t zombie-admin .
 ```
 
 ## Deployment
 
 ### Standalone Deployment
-Deploy the admin interface as a separate service alongside your ZombieAuth OIDC server.
+Deploy the admin interface as a separate service alongside your Zombie OIDC server.
 
 ### Cluster Deployment
 In clustered environments, deploy one admin interface instance per cluster node or use a load balancer to distribute traffic.
@@ -165,10 +165,10 @@ In clustered environments, deploy one admin interface instance per cluster node 
 - Monitor logs for security events
 - Regular backup of CouchDB data
 
-## Integration with ZombieAuth
+## Integration with Zombie
 
-This admin interface is designed to work with ZombieAuth OAuth2/OIDC servers:
-- **Main Project**: [ZombieAuth](https://github.com/HodlOnToYourButts/ZombieAuth)
+This admin interface is designed to work with Zombie OAuth2/OIDC servers:
+- **Main Project**: [Zombie](https://github.com/HodlOnToYourButts/Zombie)
 - **Cluster Status**: [Cluster-status](https://github.com/HodlOnToYourButts/Cluster-status)
 
 ## License
@@ -183,5 +183,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 For issues and questions:
 - Create an issue on GitHub
-- Check the ZombieAuth main project documentation
+- Check the Zombie main project documentation
 - Review the API documentation for integration details

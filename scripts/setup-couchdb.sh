@@ -1,27 +1,27 @@
 #!/bin/bash
 
-# ZombieAuth Admin CouchDB Setup Script
+# Zombie Admin CouchDB Setup Script
 #
 # This script sets up the CouchDB database with admin-specific components.
-# Run this after the main zombieauth CouchDB setup but before starting zombieauth-admin.
+# Run this after the main zombie CouchDB setup but before starting zombie-admin.
 #
 # Prerequisites:
 # - CouchDB must be running
-# - zombieauth database must exist
-# - zombieauth user must have admin access to zombieauth database
+# - zombie database must exist
+# - zombie user must have admin access to zombie database
 #
 # Required environment variables:
 # - COUCHDB_URL (optional: complete CouchDB URL, overrides HOST/PORT)
 # - COUCHDB_HOST (default: localhost, ignored if COUCHDB_URL is set)
 # - COUCHDB_PORT (default: 5984, ignored if COUCHDB_URL is set)
-# - COUCHDB_USER (default: zombieauth)
+# - COUCHDB_USER (default: zombie)
 # - COUCHDB_PASSWORD
-# - COUCHDB_DATABASE (default: zombieauth)
-# - ZOMBIEAUTH_ADMIN_CLIENT_ID (OIDC client ID for admin auth)
-# - ZOMBIEAUTH_ADMIN_CLIENT_SECRET (OIDC client secret for admin auth)
-# - ZOMBIEAUTH_ADMIN_USERNAME (admin user login)
-# - ZOMBIEAUTH_ADMIN_PASSWORD (admin user password)
-# - ZOMBIEAUTH_ADMIN_EMAIL (optional, defaults to username@zombieauth.local)
+# - COUCHDB_DATABASE (default: zombie)
+# - ZOMBIE_ADMIN_CLIENT_ID (OIDC client ID for admin auth)
+# - ZOMBIE_ADMIN_CLIENT_SECRET (OIDC client secret for admin auth)
+# - ZOMBIE_ADMIN_USERNAME (admin user login)
+# - ZOMBIE_ADMIN_PASSWORD (admin user password)
+# - ZOMBIE_ADMIN_EMAIL (optional, defaults to username@zombie.local)
 
 set -euo pipefail
 
@@ -35,20 +35,20 @@ NC='\033[0m' # No Color
 # Zombie emoji for branding
 ZOMBIE="🧟"
 
-echo -e "${BLUE}${ZOMBIE} ZombieAuth Admin CouchDB Setup${NC}"
+echo -e "${BLUE}${ZOMBIE} Zombie Admin CouchDB Setup${NC}"
 echo "============================================="
 
 # Environment variables with defaults
 COUCHDB_HOST="${COUCHDB_HOST:-localhost}"
 COUCHDB_PORT="${COUCHDB_PORT:-5984}"
-COUCHDB_USER="${COUCHDB_USER:-zombieauth}"
+COUCHDB_USER="${COUCHDB_USER:-zombie}"
 COUCHDB_PASSWORD="${COUCHDB_PASSWORD:-}"
-COUCHDB_DATABASE="${COUCHDB_DATABASE:-zombieauth}"
-ZOMBIEAUTH_ADMIN_CLIENT_ID="${ZOMBIEAUTH_ADMIN_CLIENT_ID:-}"
-ZOMBIEAUTH_ADMIN_CLIENT_SECRET="${ZOMBIEAUTH_ADMIN_CLIENT_SECRET:-}"
-ZOMBIEAUTH_ADMIN_USERNAME="${ZOMBIEAUTH_ADMIN_USERNAME:-}"
-ZOMBIEAUTH_ADMIN_PASSWORD="${ZOMBIEAUTH_ADMIN_PASSWORD:-}"
-ZOMBIEAUTH_ADMIN_EMAIL="${ZOMBIEAUTH_ADMIN_EMAIL:-${ZOMBIEAUTH_ADMIN_USERNAME}@zombieauth.local}"
+COUCHDB_DATABASE="${COUCHDB_DATABASE:-zombie}"
+ZOMBIE_ADMIN_CLIENT_ID="${ZOMBIE_ADMIN_CLIENT_ID:-}"
+ZOMBIE_ADMIN_CLIENT_SECRET="${ZOMBIE_ADMIN_CLIENT_SECRET:-}"
+ZOMBIE_ADMIN_USERNAME="${ZOMBIE_ADMIN_USERNAME:-}"
+ZOMBIE_ADMIN_PASSWORD="${ZOMBIE_ADMIN_PASSWORD:-}"
+ZOMBIE_ADMIN_EMAIL="${ZOMBIE_ADMIN_EMAIL:-${ZOMBIE_ADMIN_USERNAME}@zombie.local}"
 
 # Construct CouchDB URL (allow override with COUCHDB_URL)
 if [[ -n "$COUCHDB_URL" ]]; then
@@ -66,31 +66,31 @@ if [[ -z "$COUCHDB_PASSWORD" ]]; then
     exit 1
 fi
 
-if [[ -z "$ZOMBIEAUTH_ADMIN_CLIENT_ID" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIEAUTH_ADMIN_CLIENT_ID is required for admin authentication${NC}"
+if [[ -z "$ZOMBIE_ADMIN_CLIENT_ID" ]]; then
+    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_ID is required for admin authentication${NC}"
     echo "   Generate with: echo \"client_\$(openssl rand -hex 16)\""
     exit 1
 fi
 
-if [[ -z "$ZOMBIEAUTH_ADMIN_CLIENT_SECRET" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIEAUTH_ADMIN_CLIENT_SECRET is required for admin authentication${NC}"
+if [[ -z "$ZOMBIE_ADMIN_CLIENT_SECRET" ]]; then
+    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_SECRET is required for admin authentication${NC}"
     echo "   Generate with: openssl rand -base64 32"
     exit 1
 fi
 
-if [[ -z "$ZOMBIEAUTH_ADMIN_USERNAME" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIEAUTH_ADMIN_USERNAME is required${NC}"
+if [[ -z "$ZOMBIE_ADMIN_USERNAME" ]]; then
+    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_USERNAME is required${NC}"
     exit 1
 fi
 
-if [[ -z "$ZOMBIEAUTH_ADMIN_PASSWORD" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIEAUTH_ADMIN_PASSWORD is required${NC}"
+if [[ -z "$ZOMBIE_ADMIN_PASSWORD" ]]; then
+    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_PASSWORD is required${NC}"
     exit 1
 fi
 
 # Validate CLIENT_ID format
-if [[ ! "$ZOMBIEAUTH_ADMIN_CLIENT_ID" =~ ^client_[a-f0-9]{32}$ ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIEAUTH_ADMIN_CLIENT_ID must follow format 'client_<32_hex_chars>'${NC}"
+if [[ ! "$ZOMBIE_ADMIN_CLIENT_ID" =~ ^client_[a-f0-9]{32}$ ]]; then
+    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_ID must follow format 'client_<32_hex_chars>'${NC}"
     echo "   Generate with: echo \"client_\$(openssl rand -hex 16)\""
     exit 1
 fi
@@ -105,8 +105,8 @@ echo "🔧 Configuration:"
 echo "   Database: ${COUCHDB_DATABASE}"
 echo "   CouchDB:  ${COUCHDB_URL}"
 echo "   User:     ${COUCHDB_USER}"
-echo "   Client:   ${ZOMBIEAUTH_ADMIN_CLIENT_ID}"
-echo "   Admin:    ${ZOMBIEAUTH_ADMIN_USERNAME}"
+echo "   Client:   ${ZOMBIE_ADMIN_CLIENT_ID}"
+echo "   Admin:    ${ZOMBIE_ADMIN_USERNAME}"
 
 # Test CouchDB connection
 echo ""
@@ -124,7 +124,7 @@ echo "🗄️  Checking database access..."
 if ! curl -s -f "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}" > /dev/null; then
     echo -e "${RED}❌ ERROR: Cannot access database '${COUCHDB_DATABASE}'${NC}"
     echo "   Make sure the database exists and user has admin access"
-    echo "   Run the main zombieauth setup-couchdb.sh script first"
+    echo "   Run the main zombie setup-couchdb.sh script first"
     exit 1
 fi
 echo -e "✅ Database access confirmed"
@@ -212,20 +212,20 @@ echo ""
 echo "🔐 Creating OIDC client for admin authentication..."
 
 # Check if client already exists
-CLIENT_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/clients/_view/by_client_id?key=\"${ZOMBIEAUTH_ADMIN_CLIENT_ID}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
+CLIENT_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/clients/_view/by_client_id?key=\"${ZOMBIE_ADMIN_CLIENT_ID}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
 
 if [[ "$CLIENT_EXISTS" -gt "0" ]]; then
-    echo -e "   ${YELLOW}- OIDC client already exists: ${ZOMBIEAUTH_ADMIN_CLIENT_ID}${NC}"
+    echo -e "   ${YELLOW}- OIDC client already exists: ${ZOMBIE_ADMIN_CLIENT_ID}${NC}"
 else
-    echo "   Creating OIDC client: ${ZOMBIEAUTH_ADMIN_CLIENT_ID}"
+    echo "   Creating OIDC client: ${ZOMBIE_ADMIN_CLIENT_ID}"
     
     CLIENT_DOC="{
         \"_id\": \"client_$(openssl rand -hex 12)\",
         \"type\": \"client\",
-        \"clientId\": \"${ZOMBIEAUTH_ADMIN_CLIENT_ID}\",
-        \"clientSecret\": \"${ZOMBIEAUTH_ADMIN_CLIENT_SECRET}\",
-        \"name\": \"ZombieAuth - Admin Interface\",
-        \"description\": \"OIDC client for ZombieAuth admin interface authentication\",
+        \"clientId\": \"${ZOMBIE_ADMIN_CLIENT_ID}\",
+        \"clientSecret\": \"${ZOMBIE_ADMIN_CLIENT_SECRET}\",
+        \"name\": \"Zombie - Admin Interface\",
+        \"description\": \"OIDC client for Zombie admin interface authentication\",
         \"redirectUris\": [
             \"http://localhost:4000/callback\",
             \"http://localhost:4001/callback\",
@@ -255,12 +255,12 @@ echo ""
 echo "👤 Creating admin user..."
 
 # Check if admin user already exists
-ADMIN_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/users/_view/by_username?key=\"${ZOMBIEAUTH_ADMIN_USERNAME}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
+ADMIN_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/users/_view/by_username?key=\"${ZOMBIE_ADMIN_USERNAME}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
 
 if [[ "$ADMIN_EXISTS" -gt "0" ]]; then
-    echo -e "   ${YELLOW}- Admin user already exists: ${ZOMBIEAUTH_ADMIN_USERNAME}${NC}"
+    echo -e "   ${YELLOW}- Admin user already exists: ${ZOMBIE_ADMIN_USERNAME}${NC}"
 else
-    echo "   Creating admin user: ${ZOMBIEAUTH_ADMIN_USERNAME}"
+    echo "   Creating admin user: ${ZOMBIE_ADMIN_USERNAME}"
     
     # Generate password hash using Node.js (since we need bcrypt)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -269,13 +269,13 @@ else
     # Check if we can run node with bcrypt
     if [[ ! -d "$PROJECT_DIR/node_modules/bcrypt" ]]; then
         echo -e "   ${RED}❌ bcrypt module not found${NC}"
-        echo "   Please run 'npm install' in the zombieauth-admin directory first"
+        echo "   Please run 'npm install' in the zombie-admin directory first"
         exit 1
     fi
     
     PASSWORD_HASH=$(cd "$PROJECT_DIR" && node -e "
         const bcrypt = require('bcrypt');
-        const hash = bcrypt.hashSync('${ZOMBIEAUTH_ADMIN_PASSWORD}', 12);
+        const hash = bcrypt.hashSync('${ZOMBIE_ADMIN_PASSWORD}', 12);
         console.log(hash);
     " 2>/dev/null || echo "")
     
@@ -287,8 +287,8 @@ else
     ADMIN_DOC="{
         \"_id\": \"user_$(openssl rand -hex 12)\",
         \"type\": \"user\",
-        \"username\": \"${ZOMBIEAUTH_ADMIN_USERNAME}\",
-        \"email\": \"${ZOMBIEAUTH_ADMIN_EMAIL}\",
+        \"username\": \"${ZOMBIE_ADMIN_USERNAME}\",
+        \"email\": \"${ZOMBIE_ADMIN_EMAIL}\",
         \"passwordHash\": \"${PASSWORD_HASH}\",
         \"firstName\": \"System\",
         \"lastName\": \"Administrator\",
@@ -304,7 +304,7 @@ else
         -H "Content-Type: application/json" \
         -d "$ADMIN_DOC" | grep -q '"ok":true'; then
         echo -e "   ${GREEN}✓ Admin user created successfully${NC}"
-        echo -e "   🔑 Login credentials: ${ZOMBIEAUTH_ADMIN_USERNAME}"
+        echo -e "   🔑 Login credentials: ${ZOMBIE_ADMIN_USERNAME}"
     else
         echo -e "   ${RED}❌ Failed to create admin user${NC}"
         exit 1
@@ -312,19 +312,19 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}${ZOMBIE} ZombieAuth Admin CouchDB setup complete!${NC}"
+echo -e "${GREEN}${ZOMBIE} Zombie Admin CouchDB setup complete!${NC}"
 echo "==============================================="
 echo ""
 echo "✅ Admin views created"
 echo "✅ OIDC client configured"  
 echo "✅ Admin user ready"
 echo ""
-echo "🚀 You can now start zombieauth-admin with these environment variables:"
+echo "🚀 You can now start zombie-admin with these environment variables:"
 echo "   COUCHDB_HOST=${COUCHDB_HOST}"
 echo "   COUCHDB_PORT=${COUCHDB_PORT}"
 echo "   COUCHDB_USER=${COUCHDB_USER}"
 echo "   COUCHDB_PASSWORD=<your-password>"
 echo "   COUCHDB_DATABASE=${COUCHDB_DATABASE}"
-echo "   CLIENT_ID=${ZOMBIEAUTH_ADMIN_CLIENT_ID}"
+echo "   CLIENT_ID=${ZOMBIE_ADMIN_CLIENT_ID}"
 echo "   CLIENT_SECRET=<your-client-secret>"
 echo ""

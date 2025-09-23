@@ -19,6 +19,6 @@ RUN adduser -S nodeuser -u 1001
 RUN chown -R nodeuser:nodejs /app
 USER nodeuser
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["npm", "start"]

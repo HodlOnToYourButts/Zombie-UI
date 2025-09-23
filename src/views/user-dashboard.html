@@ -1,0 +1,270 @@
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <p class="text-muted mb-0">Welcome back, {{user.username}}!</p>
+    </div>
+</div>
+
+<!-- Account Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Active Sessions</h5>
+                        <h2 class="mb-0">{{stats.activeSessions}}</h2>
+                    </div>
+                    <div class="opacity-50">
+                        <i class="bi bi-activity" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Total Sessions</h5>
+                        <h2 class="mb-0">{{stats.totalSessions}}</h2>
+                    </div>
+                    <div class="opacity-50">
+                        <i class="bi bi-list" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Account Status</h5>
+                        <h6 class="mb-0">
+                            {{#if user.enabled}}
+                                {{#if user.emailVerified}}
+                                    <span class="badge bg-light text-success">Active</span>
+                                {{else}}
+                                    <span class="badge bg-warning">Unverified</span>
+                                {{/if}}
+                            {{else}}
+                                <span class="badge bg-danger">Disabled</span>
+                            {{/if}}
+                        </h6>
+                    </div>
+                    <div class="opacity-50">
+                        <i class="bi bi-person-check" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="/profile" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-person"></i> Update Profile
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/change-password" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-key"></i> Change Password
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="/sessions" class="btn btn-outline-info w-100">
+                            <i class="bi bi-activity"></i> Manage Sessions
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="button" class="btn btn-outline-danger w-100" onclick="revokeAllSessions()">
+                            <i class="bi bi-x-octagon"></i> Revoke All Sessions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Information and Active Sessions -->
+<div class="row">
+    <!-- Account Information -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-circle"></i> Account Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Username:</dt>
+                    <dd class="col-sm-8">{{user.username}}</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">{{user.email}}</dd>
+
+                    {{#if user.firstName}}
+                    <dt class="col-sm-4">First Name:</dt>
+                    <dd class="col-sm-8">{{user.firstName}}</dd>
+                    {{/if}}
+
+                    {{#if user.lastName}}
+                    <dt class="col-sm-4">Last Name:</dt>
+                    <dd class="col-sm-8">{{user.lastName}}</dd>
+                    {{/if}}
+
+                    <dt class="col-sm-4">Email Verified:</dt>
+                    <dd class="col-sm-8">
+                        {{#if user.emailVerified}}
+                            <span class="badge bg-success">Yes</span>
+                        {{else}}
+                            <span class="badge bg-warning">No</span>
+                        {{/if}}
+                    </dd>
+
+                    <dt class="col-sm-4">Account Created:</dt>
+                    <dd class="col-sm-8">{{formatDate user.createdAt}}</dd>
+
+                    {{#if stats.lastLogin}}
+                    <dt class="col-sm-4">Last Login:</dt>
+                    <dd class="col-sm-8">{{formatDate stats.lastLogin}}</dd>
+                    {{/if}}
+                </dl>
+
+                <div class="mt-3">
+                    <a href="/profile" class="btn btn-primary btn-sm">
+                        <i class="bi bi-pencil"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Active Sessions -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-activity"></i> Recent Active Sessions
+                </h5>
+                <a href="/sessions" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {{#if activeSessions.length}}
+                    <div class="list-group list-group-flush">
+                        {{#each activeSessions}}
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">{{clientId}}</div>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt"></i> {{ipAddress}}
+                                    {{#if userAgent}}
+                                    <br><i class="bi bi-display"></i> {{userAgent}}
+                                    {{/if}}
+                                </small>
+                            </div>
+                            <small class="text-muted">{{formatDate createdAt}}</small>
+                        </div>
+                        {{/each}}
+                    </div>
+                {{else}}
+                    <p class="text-muted mb-0">No active sessions found.</p>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+{{#if recentActivity.length}}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history"></i> Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Date</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each recentActivity}}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{action}}</span>
+                                </td>
+                                <td>
+                                    {{#if details.sessionId}}
+                                        Session: {{details.sessionId}}
+                                    {{else if details.revokedCount}}
+                                        Revoked {{details.revokedCount}} sessions
+                                    {{else}}
+                                        Profile update
+                                    {{/if}}
+                                </td>
+                                <td>{{formatDate timestamp}}</td>
+                                <td>{{details.ip}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+
+<script>
+function revokeAllSessions() {
+    if (!confirm('Are you sure you want to revoke all other sessions? This will log you out of all other devices but keep your current session active.')) {
+        return;
+    }
+
+    fetch('/user/sessions/revoke-all', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': window.csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/?message=' + encodeURIComponent(data.message) + '&messageType=success';
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error revoking sessions');
+    });
+}
+</script>

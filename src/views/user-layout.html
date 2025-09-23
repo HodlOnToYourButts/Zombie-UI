@@ -21,39 +21,29 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
-            <!-- Always visible cluster status and user dropdown on mobile/tablet -->
+            <!-- Always visible user dropdown on mobile/tablet -->
             <div class="d-flex align-items-center ms-auto d-lg-none">
-                <!-- Cluster Status Indicator -->
-                <div class="nav-link position-relative" id="navClusterStatus" style="padding-right: 0.25rem;">
-                    <div class="d-flex align-items-center">
-                        <div class="spinner-border spinner-border-sm me-2" role="status" id="clusterStatusSpinner">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <div id="clusterStatusContent">
-                            <small class="text-muted">Checking cluster...</small>
-                        </div>
-                    </div>
-                </div>
                 <!-- User Dropdown -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle text-light text-decoration-none" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> {{#if oidc_user}}{{oidc_user.username}}{{else}}Admin{{/if}}
+                        <i class="bi bi-person-circle"></i> {{#if currentUser}}{{currentUser.username}}{{else}}User{{/if}}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        {{#if oidc_user}}
+                        {{#if currentUser}}
                         <li><h6 class="dropdown-header">
-                            🔒 Authenticated via OIDC
+                            👤 {{currentUser.username}}
                         </h6></li>
                         <li><span class="dropdown-item-text small">
-                            <strong>Email:</strong> {{oidc_user.email}}<br>
-                            <strong>Roles:</strong> {{join oidc_user.roles ', '}}
+                            <strong>Email:</strong> {{currentUser.email}}<br>
                         </span></li>
                         <li><hr class="dropdown-divider"></li>
                         {{/if}}
-                        <li><a class="dropdown-item" href="/">
-                            <i class="bi bi-house"></i> Dashboard
+                        {{#if currentUser.hasAdminAccess}}
+                        <li><a class="dropdown-item" href="/admin">
+                            <i class="bi bi-gear"></i> Admin Panel
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
+                        {{/if}}
                         <li><a class="dropdown-item" href="/logout">
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </a></li>
@@ -63,56 +53,43 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{#if isClients}}active{{/if}}" href="/admin/clients">
-                            <i class="bi bi-gear"></i> Clients
+                        <a class="nav-link {{#if isProfile}}active{{/if}}" href="/profile">
+                            <i class="bi bi-person"></i> Profile
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{#if isSessions}}active{{/if}}" href="/admin/sessions">
-                            <i class="bi bi-activity"></i> Sessions
+                        <a class="nav-link {{#if isSessions}}active{{/if}}" href="/sessions">
+                            <i class="bi bi-activity"></i> My Sessions
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{#if isUsers}}active{{/if}}" href="/admin/users">
-                            <i class="bi bi-people"></i> Users
+                        <a class="nav-link {{#if isChangePassword}}active{{/if}}" href="/change-password">
+                            <i class="bi bi-key"></i> Change Password
                         </a>
                     </li>
                 </ul>
-                <!-- Cluster status and user dropdown for larger screens - positioned to the right -->
-                <ul class="navbar-nav d-none d-lg-flex">
-                    <li class="nav-item">
-                        <div class="nav-link position-relative" id="navClusterStatusDesktop" style="padding-right: 0.25rem;">
-                            <div class="d-flex align-items-center">
-                                <div class="spinner-border spinner-border-sm me-2" role="status" id="clusterStatusSpinnerDesktop">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <div id="clusterStatusContentDesktop">
-                                    <small class="text-muted">Checking cluster...</small>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+                <!-- User dropdown for larger screens - positioned to the right -->
                 <ul class="navbar-nav d-none d-lg-flex">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{#if oidc_user}}{{oidc_user.username}}{{else}}Admin{{/if}}
+                            <i class="bi bi-person-circle"></i> {{#if currentUser}}{{currentUser.username}}{{else}}User{{/if}}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            {{#if oidc_user}}
+                            {{#if currentUser}}
                             <li><h6 class="dropdown-header">
-                                🔒 Authenticated via OIDC
+                                👤 {{currentUser.username}}
                             </h6></li>
                             <li><span class="dropdown-item-text small">
-                                <strong>Email:</strong> {{oidc_user.email}}<br>
-                                <strong>Roles:</strong> {{join oidc_user.roles ', '}}
+                                <strong>Email:</strong> {{currentUser.email}}<br>
                             </span></li>
                             <li><hr class="dropdown-divider"></li>
                             {{/if}}
-                            <li><a class="dropdown-item" href="/">
-                                <i class="bi bi-house"></i> Dashboard
+                            {{#if currentUser.hasAdminAccess}}
+                            <li><a class="dropdown-item" href="/admin">
+                                <i class="bi bi-gear"></i> Admin Panel
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
+                            {{/if}}
                             <li><a class="dropdown-item" href="/logout">
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </a></li>
@@ -136,7 +113,7 @@
 
     <footer class="bg-light text-center text-muted py-3 mt-5">
         <div class="container">
-            <small>Zombie v0.1.0 - <em>Still authenticating users when everything else is dead.</em></small>
+            <small>Zombie v0.1.0 - <em>Self-service portal for managing your account.</em></small>
         </div>
     </footer>
 
@@ -145,18 +122,43 @@
         // Make CSRF token available to all JavaScript files
         window.csrfToken = '{{csrfToken}}';
 
-        // Set admin context for admin pages
+        // Context-aware Zombie logo link
         document.addEventListener('DOMContentLoaded', function() {
-            // Mark that we're in admin context
-            sessionStorage.setItem('adminContext', 'true');
-
             const zombieLogo = document.querySelector('.navbar-brand');
-            if (zombieLogo) {
-                zombieLogo.href = '/admin';
+
+            // Check if user came from admin context
+            const referrer = document.referrer;
+            const currentAdminContext = sessionStorage.getItem('adminContext') === 'true';
+
+            // Set admin context if coming from admin page
+            if (referrer && referrer.includes('/admin')) {
+                sessionStorage.setItem('adminContext', 'true');
             }
+
+            // Update logo link based on context
+            if (sessionStorage.getItem('adminContext') === 'true') {
+                zombieLogo.href = '/admin';
+            } else {
+                zombieLogo.href = '/';
+            }
+
+            // Clear admin context when explicitly going to dashboard
+            const dashboardLinks = document.querySelectorAll('a[href="/"]');
+            dashboardLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sessionStorage.removeItem('adminContext');
+                });
+            });
+
+            // Set admin context when going to admin panel
+            const adminLinks = document.querySelectorAll('a[href="/admin"]');
+            adminLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sessionStorage.setItem('adminContext', 'true');
+                });
+            });
         });
     </script>
     <script src="/js/admin.js"></script>
-    <script src="/js/cluster-nav.js"></script>
 </body>
 </html>

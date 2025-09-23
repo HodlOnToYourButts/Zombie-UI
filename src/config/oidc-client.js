@@ -6,12 +6,12 @@ function getAdminClientConfig(req) {
   const host = req.get('host') || 'localhost:3000';
   const instanceId = process.env.INSTANCE_ID || 'default';
   
-  const clientId = process.env.ZOMBIEAUTH_ADMIN_CLIENT_ID;
+  const clientId = process.env.ZOMBIE_ADMIN_CLIENT_ID;
   console.log(`DEBUG: OIDC getAdminClientConfig using client_id: ${clientId}`);
   
   return {
     client_id: clientId,
-    client_secret: process.env.ZOMBIEAUTH_ADMIN_CLIENT_SECRET,
+    client_secret: process.env.ZOMBIE_ADMIN_CLIENT_SECRET,
     redirect_uri: `${protocol}://${host}/callback`,
     post_logout_redirect_uri: `${protocol}://${host}/`,
     response_types: ['code'],

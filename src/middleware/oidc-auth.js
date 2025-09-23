@@ -28,10 +28,14 @@ function redirectToLogin(req, res) {
     req.session.oidc_state = state;
     req.session.oidc_code_verifier = codeVerifier;
     
+    // Check if this is a retry after silent auth failed
+    const isRetry = req.query.login_required === 'true';
+
     console.log('OIDC Login Debug:');
     console.log('- Generated state:', state);
     console.log('- Session ID:', req.sessionID);
     console.log('- Stored in session:', req.session.oidc_state);
+    console.log('- Is retry after silent auth:', isRetry);
     
     // Build authorization URL
     const authParams = new URLSearchParams({
@@ -43,7 +47,17 @@ function redirectToLogin(req, res) {
       code_challenge: codeChallenge,
       code_challenge_method: 'S256'
     });
-    
+
+    // For first attempt, try silent authentication (SSO)
+    // If it's a retry, force login prompt
+    if (!isRetry) {
+      authParams.set('prompt', 'none');
+      console.log('Attempting silent authentication (SSO)');
+    } else {
+      authParams.set('prompt', 'login');
+      console.log('Forcing login prompt after silent auth failed');
+    }
+
     const authUrl = `${endpoints.authorization_endpoint}?${authParams}`;
     console.log('Redirecting to OIDC provider:', authUrl);
     
@@ -71,7 +85,22 @@ function redirectToLogin(req, res) {
 // Handle OIDC callback and exchange code for tokens
 async function handleCallback(req, res) {
   try {
-    const { code, state } = req.query;
+    const { code, state, error, error_description } = req.query;
+
+    // Handle silent authentication failures (when prompt=none fails)
+    if (error) {
+      console.log('OIDC Error received:', error, error_description);
+
+      if (error === 'login_required' || error === 'interaction_required' || error === 'consent_required') {
+        console.log('Silent authentication failed, retrying with login prompt...');
+        // Retry with explicit login prompt by adding query parameter
+        return res.redirect('/auth?login_required=true');
+      }
+
+      // Other errors are actual failures
+      console.error('OIDC authentication error:', error, error_description);
+      return res.status(400).send(`Authentication failed: ${error_description || error}`);
+    }
     
     console.log('OIDC Callback Debug:');
     console.log('- Received state:', state);
@@ -235,18 +264,42 @@ function requireOidcAuth(requiredRole = null) {
       req.session.oidc_return_to = req.originalUrl;
       return redirectToLogin(req, res);
     }
-    
+
     // Add user to request object
     req.oidc_user = req.session.oidc_user;
-    
+
     // Check role if required
     if (requiredRole) {
       const userRoles = req.oidc_user.roles || [];
-      if (!userRoles.includes(requiredRole)) {
-        return res.status(403).send('Insufficient permissions');
+
+      // Special handling for 'user' role - allow anyone authenticated
+      if (requiredRole === 'user') {
+        // Any authenticated user can access user routes
+        // But admin users get admin privileges
+        if (userRoles.includes('admin')) {
+          req.oidc_user.hasAdminAccess = true;
+        }
+      } else if (requiredRole === 'admin') {
+        // Only users with admin role can access admin routes
+        if (!userRoles.includes('admin')) {
+          return res.status(403).render('error', {
+            title: 'Access Denied',
+            message: 'You need administrator privileges to access this area.',
+            layout: req.path.startsWith('/user') ? 'user-layout' : 'layout'
+          });
+        }
+      } else {
+        // For any other specific role requirement
+        if (!userRoles.includes(requiredRole)) {
+          return res.status(403).render('error', {
+            title: 'Access Denied',
+            message: `You need the '${requiredRole}' role to access this area.`,
+            layout: req.path.startsWith('/user') ? 'user-layout' : 'layout'
+          });
+        }
       }
     }
-    
+
     next();
   };
 }

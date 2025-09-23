@@ -6,7 +6,7 @@
                     <i class="bi bi-gear-{{#if client}}fill{{else}}plus{{/if}}"></i> 
                     {{#if client}}Edit Client{{else}}Add Client{{/if}}
                 </h4>
-                <a href="/clients" class="btn btn-secondary">
+                <a href="/admin/clients" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to Clients
                 </a>
             </div>
@@ -94,7 +94,7 @@
                             <i class="bi bi-check-lg"></i> 
                             {{#if client}}Update Client{{else}}Create Client{{/if}}
                         </button>
-                        <a href="/clients" class="btn btn-secondary">Cancel</a>
+                        <a href="/admin/clients" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -139,7 +139,7 @@
                     <button class="btn btn-warning btn-sm" data-action="regenerate-secret" data-client-id="{{client.id}}">
                         <i class="bi bi-arrow-clockwise"></i> Regenerate Secret
                     </button>
-                    {{#unless (eq client.clientId "zombieauth")}}
+                    {{#unless (eq client.clientId "zombie")}}
                     <hr>
                     <button class="btn btn-danger btn-sm" data-action="delete-client" data-client-id="{{client.id}}">
                         <i class="bi bi-trash"></i> Delete Client
