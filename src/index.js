@@ -135,7 +135,7 @@ sessionManager.setSessionStore(sessionStore);
 
 app.use(session({
   name: `zombie-admin-session-${process.env.INSTANCE_ID || 'default'}`,
-  secret: process.env.ZOMBIE_ADMIN_SESSION_SECRET,
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true, // Changed to true to ensure session is created
   store: sessionStore,

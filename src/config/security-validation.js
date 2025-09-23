@@ -21,9 +21,9 @@ const PRODUCTION_FORBIDDEN_DEFAULTS = [
 const SECURITY_REQUIREMENTS = {
   COUCHDB_USER: { minLength: 5, pattern: /^[a-zA-Z0-9_-]+$/ },
   COUCHDB_PASSWORD: { minLength: 12, requireComplex: false },
-  ZOMBIE_ADMIN_SESSION_SECRET: { minLength: 32, entropy: 'high' },
-  ZOMBIE_ADMIN_CLIENT_SECRET: { minLength: 32, entropy: 'high' },
-  ZOMBIE_ADMIN_CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
+  SESSION_SECRET: { minLength: 32, entropy: 'high' },
+  CLIENT_SECRET: { minLength: 32, entropy: 'high' },
+  CLIENT_ID: { pattern: /^client_[a-fA-F0-9]{32}$/ }
 };
 
 function validateSecurityConfiguration() {

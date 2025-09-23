@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: zombie-ui
     env_file:
-      - .env.docker  # Use Docker-specific environment file
+      - .env.dev.zombie-ui  # Use development environment file
     ports:
       - "18080:8080"  # Publish UI on port 18080
     volumes:
@@ -30,7 +30,7 @@ services:
     image: ghcr.io/hodlontoyourbutts/replication-monitor:latest
     container_name: replication-monitor
     env_file:
-      - .env.docker  # Use same Docker environment file
+      - .env.dev.replication-monitor  # Use replication monitor environment file
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
