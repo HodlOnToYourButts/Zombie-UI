@@ -98,9 +98,14 @@ class User {
       const db = database.getDb();
       const now = new Date().toISOString();
       const instanceId = process.env.INSTANCE_ID || 'unknown';
-      
+
       this.updated_at = now;
-      
+
+      // Check if this is a new user and if it should be promoted to first admin
+      if (!this._rev) {
+        await this.checkAndPromoteToFirstAdmin(db);
+      }
+
       // Update instance metadata
       if (!this.instance_metadata.created_by) {
         this.instance_metadata.created_by = instanceId;
@@ -110,13 +115,43 @@ class User {
       this.instance_metadata.last_modified_by = instanceId;
       this.instance_metadata.last_modified_at = now;
       this.instance_metadata.version = (this.instance_metadata.version || 1) + 1;
-      
+
       const result = await db.insert(this.toJSON());
       this._rev = result.rev;
       return this;
     } catch (error) {
       console.error('Error saving user:', error);
       throw error;
+    }
+  }
+
+  async checkAndPromoteToFirstAdmin(db) {
+    try {
+      // Check if any users exist in the database
+      const result = await db.view('users', 'by_username', {
+        limit: 1,
+        include_docs: false
+      });
+
+      // If no users exist, make this user an admin
+      if (result.rows.length === 0) {
+        console.log('👑 First user detected - promoting to admin');
+        this.roles = this.roles || [];
+        this.groups = this.groups || [];
+
+        if (!this.roles.includes('admin')) {
+          this.roles.push('admin');
+        }
+        if (!this.roles.includes('user')) {
+          this.roles.push('user');
+        }
+        if (!this.groups.includes('admin')) {
+          this.groups.push('admin');
+        }
+      }
+    } catch (error) {
+      // If the view doesn't exist or there's an error, don't fail the user creation
+      console.warn('Could not check for existing users - skipping first admin promotion:', error.message);
     }
   }
 
