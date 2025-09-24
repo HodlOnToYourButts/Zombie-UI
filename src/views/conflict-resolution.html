@@ -36,18 +36,18 @@
                                         <table class="table table-sm">
                                             <tr><th>Username:</th><td>{{currentVersion.user.username}}</td></tr>
                                             <tr><th>Email:</th><td>{{currentVersion.user.email}}</td></tr>
-                                            <tr><th>Name:</th><td>{{currentVersion.user.firstName}} {{currentVersion.user.lastName}}</td></tr>
+                                            <tr><th>Name:</th><td>{{currentVersion.user.first_name}} {{currentVersion.user.last_name}}</td></tr>
                                             <tr><th>Groups:</th><td>{{#each currentVersion.user.groups}}<span class="badge bg-secondary me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Roles:</th><td>{{#each currentVersion.user.roles}}<span class="badge bg-info me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Status:</th><td>{{#if currentVersion.user.enabled}}<span class="badge bg-success">Enabled</span>{{else}}<span class="badge bg-danger">Disabled</span>{{/if}}</td></tr>
-                                            <tr><th>Email Verified:</th><td>{{#if currentVersion.user.emailVerified}}<span class="badge bg-success">Yes</span>{{else}}<span class="badge bg-warning">No</span>{{/if}}</td></tr>
+                                            <tr><th>Email Verified:</th><td>{{#if currentVersion.user.email_verified}}<span class="badge bg-success">Yes</span>{{else}}<span class="badge bg-warning">No</span>{{/if}}</td></tr>
                                         </table>
                                     {{/if}}
                                     
                                     {{#if (eq entityType 'client')}}
                                         <table class="table table-sm">
                                             <tr><th>Name:</th><td>{{currentVersion.client.name}}</td></tr>
-                                            <tr><th>Client ID:</th><td><code>{{currentVersion.client.clientId}}</code></td></tr>
+                                            <tr><th>Client ID:</th><td><code>{{currentVersion.client.client_id}}</code></td></tr>
                                             <tr><th>Type:</th><td>{{#if currentVersion.client.confidential}}<span class="badge bg-primary">Confidential</span>{{else}}<span class="badge bg-info">Public</span>{{/if}}</td></tr>
                                             <tr><th>Redirect URIs:</th><td>{{#each currentVersion.client.redirectUris}}<div><small><code>{{this}}</code></small></div>{{/each}}</td></tr>
                                             <tr><th>Scopes:</th><td>{{#each currentVersion.client.scopes}}<span class="badge bg-light text-dark me-1">{{this}}</span>{{/each}}</td></tr>
@@ -58,10 +58,10 @@
                                     {{#if (eq entityType 'session')}}
                                         <table class="table table-sm">
                                             <tr><th>User:</th><td>{{currentVersion.session.user.username}} ({{currentVersion.session.user.email}})</td></tr>
-                                            <tr><th>Client ID:</th><td><code>{{currentVersion.session.clientId}}</code></td></tr>
+                                            <tr><th>Client ID:</th><td><code>{{currentVersion.session.client_id}}</code></td></tr>
                                             <tr><th>Scopes:</th><td>{{#each currentVersion.session.scopes}}<span class="badge bg-light text-dark me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Status:</th><td>{{#if currentVersion.session.active}}<span class="badge bg-success">Active</span>{{else}}<span class="badge bg-secondary">Inactive</span>{{/if}}</td></tr>
-                                            <tr><th>Created:</th><td>{{formatDate currentVersion.session.createdAt}}</td></tr>
+                                            <tr><th>Created:</th><td>{{formatDate currentVersion.session.created_at}}</td></tr>
                                             <tr><th>Expires:</th><td>{{#if currentVersion.session.expiresAt}}{{formatDate currentVersion.session.expiresAt}}{{else}}Never{{/if}}</td></tr>
                                         </table>
                                     {{/if}}
@@ -95,18 +95,18 @@
                                         <table class="table table-sm">
                                             <tr><th>Username:</th><td>{{this.user.username}}</td></tr>
                                             <tr><th>Email:</th><td>{{this.user.email}}</td></tr>
-                                            <tr><th>Name:</th><td>{{this.user.firstName}} {{this.user.lastName}}</td></tr>
+                                            <tr><th>Name:</th><td>{{this.user.first_name}} {{this.user.last_name}}</td></tr>
                                             <tr><th>Groups:</th><td>{{#each this.user.groups}}<span class="badge bg-secondary me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Roles:</th><td>{{#each this.user.roles}}<span class="badge bg-info me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Status:</th><td>{{#if this.user.enabled}}<span class="badge bg-success">Enabled</span>{{else}}<span class="badge bg-danger">Disabled</span>{{/if}}</td></tr>
-                                            <tr><th>Email Verified:</th><td>{{#if this.user.emailVerified}}<span class="badge bg-success">Yes</span>{{else}}<span class="badge bg-warning">No</span>{{/if}}</td></tr>
+                                            <tr><th>Email Verified:</th><td>{{#if this.user.email_verified}}<span class="badge bg-success">Yes</span>{{else}}<span class="badge bg-warning">No</span>{{/if}}</td></tr>
                                         </table>
                                     {{/if}}
                                     
                                     {{#if (eq ../entityType 'client')}}
                                         <table class="table table-sm">
                                             <tr><th>Name:</th><td>{{this.client.name}}</td></tr>
-                                            <tr><th>Client ID:</th><td><code>{{this.client.clientId}}</code></td></tr>
+                                            <tr><th>Client ID:</th><td><code>{{this.client.client_id}}</code></td></tr>
                                             <tr><th>Type:</th><td>{{#if this.client.confidential}}<span class="badge bg-primary">Confidential</span>{{else}}<span class="badge bg-info">Public</span>{{/if}}</td></tr>
                                             <tr><th>Redirect URIs:</th><td>{{#each this.client.redirectUris}}<div><small><code>{{this}}</code></small></div>{{/each}}</td></tr>
                                             <tr><th>Scopes:</th><td>{{#each this.client.scopes}}<span class="badge bg-light text-dark me-1">{{this}}</span>{{/each}}</td></tr>
@@ -117,10 +117,10 @@
                                     {{#if (eq ../entityType 'session')}}
                                         <table class="table table-sm">
                                             <tr><th>User:</th><td>{{this.session.user.username}} ({{this.session.user.email}})</td></tr>
-                                            <tr><th>Client ID:</th><td><code>{{this.session.clientId}}</code></td></tr>
+                                            <tr><th>Client ID:</th><td><code>{{this.session.client_id}}</code></td></tr>
                                             <tr><th>Scopes:</th><td>{{#each this.session.scopes}}<span class="badge bg-light text-dark me-1">{{this}}</span>{{/each}}</td></tr>
                                             <tr><th>Status:</th><td>{{#if this.session.active}}<span class="badge bg-success">Active</span>{{else}}<span class="badge bg-secondary">Inactive</span>{{/if}}</td></tr>
-                                            <tr><th>Created:</th><td>{{formatDate this.session.createdAt}}</td></tr>
+                                            <tr><th>Created:</th><td>{{formatDate this.session.created_at}}</td></tr>
                                             <tr><th>Expires:</th><td>{{#if this.session.expiresAt}}{{formatDate this.session.expiresAt}}{{else}}Never{{/if}}</td></tr>
                                         </table>
                                     {{/if}}

@@ -69,9 +69,9 @@ async function showUserSessions(userId) {
                         <div class="list-group-item">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="small">
-                                    <div><strong>Client:</strong> ${session.clientId}</div>
-                                    <div class="text-muted">Created: ${new Date(session.createdAt).toLocaleString()}</div>
-                                    ${session.expiresAt ? `<div class="text-muted">Expires: ${new Date(session.expiresAt).toLocaleString()}</div>` : ''}
+                                    <div><strong>Client:</strong> ${session.client_id}</div>
+                                    <div class="text-muted">Created: ${new Date(session.created_at).toLocaleString()}</div>
+                                    ${session.expires_at ? `<div class="text-muted">Expires: ${new Date(session.expires_at).toLocaleString()}</div>` : ''}
                                 </div>
                                 <div>
                                     ${statusBadge}

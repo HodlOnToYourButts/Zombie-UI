@@ -30,12 +30,12 @@ router.post('/users/:id/toggle', oidcAuth.requireOidcAuth('admin'), async (req, 
     
     // Log activity
     await Activity.logActivity(req.body.enabled ? 'user_enabled' : 'user_disabled', {
-      targetUsername: user.username,
-      targetUserId: user._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: user.username,
+      target_user_id: user._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.json({ success: true });
@@ -60,12 +60,12 @@ router.delete('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) 
     
     // Log activity before deletion
     await Activity.logActivity('user_deleted', {
-      targetUsername: user.username,
-      targetUserId: user._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: user.username,
+      target_user_id: user._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     await user.delete();
@@ -89,17 +89,17 @@ router.post('/users/:id/password', oidcAuth.requireOidcAuth('admin'), async (req
       return res.json({ success: false, error: 'Password must be at least 6 characters' });
     }
     
-    user.passwordHash = await User.hashPassword(password);
+    user.password_hash = await User.hashPassword(password);
     await user.save();
     
     // Log activity
     await Activity.logActivity('password_reset', {
-      targetUsername: user.username,
-      targetUserId: user._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: user.username,
+      target_user_id: user._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.json({ success: true });
@@ -154,15 +154,15 @@ router.get('/sessions/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) 
       return res.json({ success: false, error: 'Session not found' });
     }
     
-    const user = await User.findById(session.userId);
+    const user = await User.findById(session.user_id);
     
     const sessionData = {
       ...session.toPublicJSON(),
       user: user ? user.toPublicJSON() : { username: 'Unknown', email: 'Unknown' },
       isExpired: session.isExpired(),
-      accessToken: !!session.accessToken,
-      refreshToken: !!session.refreshToken,
-      idToken: !!session.idToken
+      accessToken: !!session.access_token,
+      refreshToken: !!session.refresh_token,
+      idToken: !!session.id_token
     };
     
     res.json({ success: true, session: sessionData });
@@ -183,16 +183,16 @@ router.post('/sessions/:id/invalidate', oidcAuth.requireOidcAuth('admin'), async
     
     // Log activity
     await Activity.logActivity('session_invalidated', {
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      user_agent: req.headers['user-agent'],
       details: `Session ${req.params.id} invalidated`
     });
     
     // Destroy the user's Express session if they have one
     const sessionManager = require('../utils/session-manager');
-    const sessionDestroyed = await sessionManager.destroyUserSession(session.userId);
+    const sessionDestroyed = await sessionManager.destroyUserSession(session.user_id);
     
     res.json({ 
       success: true, 
@@ -215,7 +215,7 @@ router.delete('/sessions/:id', oidcAuth.requireOidcAuth('admin'), async (req, re
     
     // Destroy the user's Express session if they have one
     const sessionManager = require('../utils/session-manager');
-    const sessionDestroyed = await sessionManager.destroyUserSession(session.userId);
+    const sessionDestroyed = await sessionManager.destroyUserSession(session.user_id);
     
     res.json({ 
       success: true, 
@@ -299,7 +299,7 @@ router.post('/clients/:id/toggle', oidcAuth.requireOidcAuth('admin'), async (req
     }
     
     // Don't allow disabling the default admin client
-    if (client.clientId === 'zombie' && !req.body.enabled) {
+    if (client.client_id === 'zombie' && !req.body.enabled) {
       return res.json({ success: false, error: 'Cannot disable the default client' });
     }
     
@@ -308,12 +308,12 @@ router.post('/clients/:id/toggle', oidcAuth.requireOidcAuth('admin'), async (req
     
     // Log activity
     await Activity.logActivity(req.body.enabled ? 'client_enabled' : 'client_disabled', {
-      targetUsername: client.name,
-      targetUserId: client._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: client.name,
+      target_user_id: client._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.json({ success: true });
@@ -333,17 +333,17 @@ router.post('/clients/:id/regenerate-secret', oidcAuth.requireOidcAuth('admin'),
     
     // Generate new secret
     const newSecret = client.generateClientSecret();
-    client.clientSecret = newSecret;
+    client.client_secret = newSecret;
     await client.save();
     
     // Log activity
     await Activity.logActivity('client_secret_regenerated', {
-      targetUsername: client.name,
-      targetUserId: client._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: client.name,
+      target_user_id: client._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.json({ success: true, clientSecret: newSecret });
@@ -362,18 +362,18 @@ router.delete('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res
     }
     
     // Don't allow deleting the default admin client
-    if (client.clientId === 'zombie') {
+    if (client.client_id === 'zombie') {
       return res.json({ success: false, error: 'Cannot delete the default client' });
     }
     
     // Log activity before deletion
     await Activity.logActivity('client_deleted', {
-      targetUsername: client.name,
-      targetUserId: client._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: client.name,
+      target_user_id: client._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     await client.delete();
@@ -438,11 +438,11 @@ router.post('/conflicts/:docId/resolve', oidcAuth.requireOidcAuth('admin'), asyn
       Object.assign(currentDoc, mergeData);
       
       // Update instance metadata
-      currentDoc.instanceMetadata = {
-        ...currentDoc.instanceMetadata,
-        lastModifiedBy: process.env.INSTANCE_ID || 'unknown',
-        lastModifiedAt: new Date().toISOString(),
-        version: (currentDoc.instanceMetadata?.version || 1) + 1
+      currentDoc.instance_metadata = {
+        ...currentDoc.instance_metadata,
+        last_modified_by: process.env.INSTANCE_ID || 'unknown',
+        last_modified_at: new Date().toISOString(),
+        version: (currentDoc.instance_metadata?.version || 1) + 1
       };
       
       // Add conflict resolution metadata
@@ -468,10 +468,10 @@ router.post('/conflicts/:docId/resolve', oidcAuth.requireOidcAuth('admin'), asyn
     
     // Log activity
     await Activity.logActivity('conflict_resolved', {
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      user_agent: req.headers['user-agent'],
       details: `Resolved conflict for document ${docId}`
     });
     

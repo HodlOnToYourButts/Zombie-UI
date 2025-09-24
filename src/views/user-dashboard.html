@@ -46,7 +46,7 @@
                         <h5 class="card-title mb-0">Account Status</h5>
                         <h6 class="mb-0">
                             {{#if user.enabled}}
-                                {{#if user.emailVerified}}
+                                {{#if user.email_verified}}
                                     <span class="badge bg-light text-success">Active</span>
                                 {{else}}
                                     <span class="badge bg-warning">Unverified</span>
@@ -120,19 +120,19 @@
                     <dt class="col-sm-4">Email:</dt>
                     <dd class="col-sm-8">{{user.email}}</dd>
 
-                    {{#if user.firstName}}
+                    {{#if user.first_name}}
                     <dt class="col-sm-4">First Name:</dt>
-                    <dd class="col-sm-8">{{user.firstName}}</dd>
+                    <dd class="col-sm-8">{{user.first_name}}</dd>
                     {{/if}}
 
-                    {{#if user.lastName}}
+                    {{#if user.last_name}}
                     <dt class="col-sm-4">Last Name:</dt>
-                    <dd class="col-sm-8">{{user.lastName}}</dd>
+                    <dd class="col-sm-8">{{user.last_name}}</dd>
                     {{/if}}
 
                     <dt class="col-sm-4">Email Verified:</dt>
                     <dd class="col-sm-8">
-                        {{#if user.emailVerified}}
+                        {{#if user.email_verified}}
                             <span class="badge bg-success">Yes</span>
                         {{else}}
                             <span class="badge bg-warning">No</span>
@@ -140,7 +140,7 @@
                     </dd>
 
                     <dt class="col-sm-4">Account Created:</dt>
-                    <dd class="col-sm-8">{{formatDate user.createdAt}}</dd>
+                    <dd class="col-sm-8">{{formatDate user.created_at}}</dd>
 
                     {{#if stats.lastLogin}}
                     <dt class="col-sm-4">Last Login:</dt>
@@ -172,15 +172,15 @@
                         {{#each activeSessions}}
                         <div class="list-group-item d-flex justify-content-between align-items-start">
                             <div class="ms-2 me-auto">
-                                <div class="fw-bold">{{clientId}}</div>
+                                <div class="fw-bold">{{client_id}}</div>
                                 <small class="text-muted">
                                     <i class="bi bi-geo-alt"></i> {{ipAddress}}
-                                    {{#if userAgent}}
-                                    <br><i class="bi bi-display"></i> {{userAgent}}
+                                    {{#if user_agent}}
+                                    <br><i class="bi bi-display"></i> {{user_agent}}
                                     {{/if}}
                                 </small>
                             </div>
-                            <small class="text-muted">{{formatDate createdAt}}</small>
+                            <small class="text-muted">{{formatDate created_at}}</small>
                         </div>
                         {{/each}}
                     </div>
@@ -220,8 +220,8 @@
                                     <span class="badge bg-secondary">{{action}}</span>
                                 </td>
                                 <td>
-                                    {{#if details.sessionId}}
-                                        Session: {{details.sessionId}}
+                                    {{#if details.session_id}}
+                                        Session: {{details.session_id}}
                                     {{else if details.revokedCount}}
                                         Revoked {{details.revokedCount}} sessions
                                     {{else}}

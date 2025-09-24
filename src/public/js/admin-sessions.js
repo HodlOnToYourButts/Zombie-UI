@@ -129,7 +129,7 @@ async function viewSessionDetails(sessionId) {
                             </dd>
                             
                             <dt class="col-sm-4">Client ID:</dt>
-                            <dd class="col-sm-8"><code>${session.clientId}</code></dd>
+                            <dd class="col-sm-8"><code>${session.client_id}</code></dd>
                             
                             <dt class="col-sm-4">Status:</dt>
                             <dd class="col-sm-8">
@@ -143,13 +143,13 @@ async function viewSessionDetails(sessionId) {
                     <div class="col-md-6">
                         <dl class="row">
                             <dt class="col-sm-5">Created:</dt>
-                            <dd class="col-sm-7">${new Date(session.createdAt).toLocaleString()}</dd>
-                            
+                            <dd class="col-sm-7">${new Date(session.created_at).toLocaleString()}</dd>
+
                             <dt class="col-sm-5">Last Accessed:</dt>
-                            <dd class="col-sm-7">${session.lastAccessedAt ? new Date(session.lastAccessedAt).toLocaleString() : 'Never'}</dd>
-                            
+                            <dd class="col-sm-7">${session.last_accessed_at ? new Date(session.last_accessed_at).toLocaleString() : 'Never'}</dd>
+
                             <dt class="col-sm-5">Expires:</dt>
-                            <dd class="col-sm-7">${session.expiresAt ? new Date(session.expiresAt).toLocaleString() : 'No expiry'}</dd>
+                            <dd class="col-sm-7">${session.expires_at ? new Date(session.expires_at).toLocaleString() : 'No expiry'}</dd>
                             
                             <dt class="col-sm-5">Tokens:</dt>
                             <dd class="col-sm-7">

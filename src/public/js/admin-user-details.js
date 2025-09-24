@@ -183,8 +183,8 @@ function displayUserSessions(sessions) {
                 : '';
             
             content += `<tr>
-                <td>${session.clientId || 'Unknown'}</td>
-                <td class="small text-muted">${new Date(session.createdAt).toLocaleString()}</td>
+                <td>${session.client_id || 'Unknown'}</td>
+                <td class="small text-muted">${new Date(session.created_at).toLocaleString()}</td>
                 <td>${statusBadge}</td>
                 <td>${actions}</td>
             </tr>`;

@@ -39,7 +39,7 @@ router.get('/', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     const stats = {
       totalSessions: allSessions.length,
       activeSessions: activeSessions.length,
-      lastLogin: activeSessions.length > 0 ? Math.max(...activeSessions.map(s => new Date(s.createdAt).getTime())) : null
+      lastLogin: activeSessions.length > 0 ? Math.max(...activeSessions.map(s => new Date(s.created_at).getTime())) : null
     };
 
     res.render('user-dashboard', addUserContext(req, {
@@ -98,18 +98,18 @@ router.post('/profile', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     const { firstName, lastName } = req.body;
 
     // Users can only update their names
-    user.firstName = firstName || undefined;
-    user.lastName = lastName || undefined;
+    user.first_name = firstName || undefined;
+    user.last_name = lastName || undefined;
 
     await user.save();
 
     // Log activity
     await Activity.logActivity('profile_updated', {
-      targetUsername: user.username,
-      targetUserId: user._id,
+      target_username: user.username,
+      target_user_id: user._id,
       username: user.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
 
     res.redirect('/profile?message=Profile updated successfully&messageType=success');
@@ -207,11 +207,11 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
 
     // Log activity
     await Activity.logActivity('password_changed', {
-      targetUsername: user.username,
-      targetUserId: user._id,
+      target_username: user.username,
+      target_user_id: user._id,
       username: user.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
 
     res.redirect('/?message=Password changed successfully&messageType=success');
@@ -285,7 +285,7 @@ router.post('/sessions/:id/revoke', oidcAuth.requireOidcAuth('user'), async (req
     }
 
     // Ensure user can only revoke their own sessions
-    if (session.userId !== user._id) {
+    if (session.user_id !== user._id) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -300,11 +300,11 @@ router.post('/sessions/:id/revoke', oidcAuth.requireOidcAuth('user'), async (req
 
     // Log activity
     await Activity.logActivity('session_revoked', {
-      targetUsername: user.username,
-      targetUserId: user._id,
+      target_username: user.username,
+      target_user_id: user._id,
       username: user.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      user_agent: req.headers['user-agent'],
       details: { sessionId: sessionId }
     });
 
@@ -337,11 +337,11 @@ router.post('/sessions/revoke-all', oidcAuth.requireOidcAuth('user'), async (req
 
     // Log activity
     await Activity.logActivity('all_sessions_revoked', {
-      targetUsername: user.username,
-      targetUserId: user._id,
+      target_username: user.username,
+      target_user_id: user._id,
       username: user.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      user_agent: req.headers['user-agent'],
       details: { revokedCount }
     });
 

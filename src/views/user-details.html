@@ -27,9 +27,9 @@
                             
                             <dt class="col-sm-4">Name:</dt>
                             <dd class="col-sm-8">
-                                {{#if user.firstName}}{{user.firstName}}{{/if}}
-                                {{#if user.lastName}}{{user.lastName}}{{/if}}
-                                {{#unless user.firstName}}{{#unless user.lastName}}<em class="text-muted">Not set</em>{{/unless}}{{/unless}}
+                                {{#if user.first_name}}{{user.first_name}}{{/if}}
+                                {{#if user.last_name}}{{user.last_name}}{{/if}}
+                                {{#unless user.first_name}}{{#unless user.last_name}}<em class="text-muted">Not set</em>{{/unless}}{{/unless}}
                             </dd>
                             
                             <dt class="col-sm-4">Status:</dt>
@@ -39,7 +39,7 @@
                                 {{else}}
                                 <span class="badge bg-secondary">Disabled</span>
                                 {{/if}}
-                                {{#if user.emailVerified}}
+                                {{#if user.email_verified}}
                                 <span class="badge bg-info">Email Verified</span>
                                 {{else}}
                                 <span class="badge bg-warning">Email Not Verified</span>
@@ -57,8 +57,8 @@
                             
                             <dt class="col-sm-4">Created:</dt>
                             <dd class="col-sm-8">
-                                {{#if user.createdAt}}
-                                {{formatDate user.createdAt}}
+                                {{#if user.created_at}}
+                                {{formatDate user.created_at}}
                                 {{else}}
                                 <em class="text-muted">Unknown</em>
                                 {{/if}}
@@ -142,8 +142,8 @@
                     <div class="list-group-item px-0">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="small">
-                                <div class="text-muted">Client: {{this.clientId}}</div>
-                                <div class="text-muted">Created: {{formatDate this.createdAt}}</div>
+                                <div class="text-muted">Client: {{this.client_id}}</div>
+                                <div class="text-muted">Created: {{formatDate this.created_at}}</div>
                                 {{#if this.expiresAt}}
                                 <div class="text-muted">Expires: {{formatDate this.expiresAt}}</div>
                                 {{/if}}

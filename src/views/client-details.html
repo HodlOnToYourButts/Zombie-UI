@@ -22,7 +22,7 @@
             <div class="card-body">
                 <dl class="row">
                     <dt class="col-sm-3">Client ID:</dt>
-                    <dd class="col-sm-9"><code>{{client.clientId}}</code></dd>
+                    <dd class="col-sm-9"><code>{{client.client_id}}</code></dd>
                     
                     <dt class="col-sm-3">Description:</dt>
                     <dd class="col-sm-9">{{#if client.description}}{{client.description}}{{else}}<em class="text-muted">No description</em>{{/if}}</dd>
@@ -46,10 +46,10 @@
                     </dd>
                     
                     <dt class="col-sm-3">Created:</dt>
-                    <dd class="col-sm-9">{{formatDate client.createdAt}}</dd>
+                    <dd class="col-sm-9">{{formatDate client.created_at}}</dd>
                     
                     <dt class="col-sm-3">Last Updated:</dt>
-                    <dd class="col-sm-9">{{formatDate client.updatedAt}}</dd>
+                    <dd class="col-sm-9">{{formatDate client.updated_at}}</dd>
                 </dl>
             </div>
         </div>
@@ -101,8 +101,8 @@
                 <dl class="row small">
                     <dt class="col-sm-4">Client ID:</dt>
                     <dd class="col-sm-8">
-                        <code>{{client.clientId}}</code>
-                        <button type="button" class="btn btn-sm btn-outline-secondary ms-1" data-action="copy-text" data-text="{{client.clientId}}">
+                        <code>{{client.client_id}}</code>
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-1" data-action="copy-text" data-text="{{client.client_id}}">
                             <i class="bi bi-copy"></i>
                         </button>
                     </dd>
@@ -152,7 +152,7 @@
             <div class="card-body">
                 <div class="d-grid gap-2">
                     {{#if client.enabled}}
-                    {{#unless (eq client.clientId "zombie")}}
+                    {{#unless (eq client.client_id "zombie")}}
                     <button class="btn btn-warning btn-sm" data-action="toggle-client" data-client-id="{{client.id}}" data-enabled="false">
                         <i class="bi bi-pause"></i> Disable Client
                     </button>
@@ -165,7 +165,7 @@
                     <button class="btn btn-info btn-sm" data-action="regenerate-secret" data-client-id="{{client.id}}">
                         <i class="bi bi-arrow-clockwise"></i> Regenerate Secret
                     </button>
-                    {{#unless (eq client.clientId "zombie")}}
+                    {{#unless (eq client.client_id "zombie")}}
                     <hr>
                     <button class="btn btn-danger btn-sm" data-action="delete-client" data-client-id="{{client.id}}">
                         <i class="bi bi-trash"></i> Delete Client

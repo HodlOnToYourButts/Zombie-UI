@@ -98,9 +98,9 @@ function showUserSessions(userId) {
                         const status = session.active ? (session.isExpired ? 'Expired' : 'Active') : 'Inactive';
                         const statusClass = session.active ? (session.isExpired ? 'warning' : 'success') : 'secondary';
                         html += `<tr>
-                            <td><code>${session.clientId}</code></td>
+                            <td><code>${session.client_id}</code></td>
                             <td><span class="badge bg-${statusClass}">${status}</span></td>
-                            <td>${formatDate(session.createdAt)}</td>
+                            <td>${formatDate(session.created_at)}</td>
                             <td>
                                 ${session.active ? `<button class="btn btn-sm btn-outline-warning" onclick="invalidateSession('${session.id}')">Invalidate</button>` : ''}
                                 <button class="btn btn-sm btn-outline-danger" onclick="deleteSession('${session.id}')">Delete</button>
@@ -264,7 +264,7 @@ function viewSessionDetails(sessionId) {
                         <dd class="col-sm-9">${session.user.username} (${session.user.email})</dd>
                         
                         <dt class="col-sm-3">Client ID:</dt>
-                        <dd class="col-sm-9"><code>${session.clientId}</code></dd>
+                        <dd class="col-sm-9"><code>${session.client_id}</code></dd>
                         
                         <dt class="col-sm-3">Scopes:</dt>
                         <dd class="col-sm-9">
@@ -279,14 +279,14 @@ function viewSessionDetails(sessionId) {
                         </dd>
                         
                         <dt class="col-sm-3">Created:</dt>
-                        <dd class="col-sm-9">${formatDate(session.createdAt)}</dd>
-                        
+                        <dd class="col-sm-9">${formatDate(session.created_at)}</dd>
+
                         <dt class="col-sm-3">Last Accessed:</dt>
-                        <dd class="col-sm-9">${session.lastAccessedAt ? formatDate(session.lastAccessedAt) : 'Never'}</dd>
-                        
+                        <dd class="col-sm-9">${session.last_accessed_at ? formatDate(session.last_accessed_at) : 'Never'}</dd>
+
                         <dt class="col-sm-3">Expires:</dt>
-                        <dd class="col-sm-9">${session.expiresAt ? formatDate(session.expiresAt) : 'No expiry'}</dd>
-                        
+                        <dd class="col-sm-9">${session.expires_at ? formatDate(session.expires_at) : 'No expiry'}</dd>
+
                         <dt class="col-sm-3">Has Tokens:</dt>
                         <dd class="col-sm-9">
                             ${session.accessToken ? '<span class="badge bg-success me-1">Access</span>' : ''}

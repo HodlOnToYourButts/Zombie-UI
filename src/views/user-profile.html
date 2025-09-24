@@ -31,7 +31,7 @@
                             <label for="email" class="form-label">Email</label>
                             <div class="input-group">
                                 <input type="email" class="form-control" id="email" value="{{user.email}}" readonly style="color: #495057; font-weight: 500;">
-                                {{#if user.emailVerified}}
+                                {{#if user.email_verified}}
                                     <span class="input-group-text text-success">
                                         <i class="bi bi-check-circle"></i>
                                     </span>
@@ -42,7 +42,7 @@
                                 {{/if}}
                             </div>
                             <div class="form-text">
-                                {{#if user.emailVerified}}
+                                {{#if user.email_verified}}
                                     Email is verified
                                 {{else}}
                                     Email is not verified - contact administrator
@@ -54,11 +54,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" name="firstName" value="{{user.firstName}}" maxlength="50">
+                            <input type="text" class="form-control" id="firstName" name="firstName" value="{{user.first_name}}" maxlength="50">
                         </div>
                         <div class="col-md-6">
                             <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" name="lastName" value="{{user.lastName}}" maxlength="50">
+                            <input type="text" class="form-control" id="lastName" name="lastName" value="{{user.last_name}}" maxlength="50">
                         </div>
                     </div>
 
@@ -76,7 +76,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Member Since</label>
-                            <div class="form-control-plaintext" style="color: #212529; font-weight: 500;">{{formatDate user.createdAt}}</div>
+                            <div class="form-control-plaintext" style="color: #212529; font-weight: 500;">{{formatDate user.created_at}}</div>
                         </div>
                     </div>
 

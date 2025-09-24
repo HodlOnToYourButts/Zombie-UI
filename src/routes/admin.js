@@ -134,10 +134,10 @@ router.get('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
         }
         // Check if this user record is isolated using the raw document
         else if (clusterHealth.isRecordIsolated(row.doc)) {
-          console.log(`User ${publicUser.username} is isolated - modified at:`, row.doc.instanceMetadata?.lastModifiedAt);
+          console.log(`User ${publicUser.username} is isolated - modified at:`, row.doc.instance_metadata?.last_modified_at);
           publicUser.syncStatus = 'isolated';
         } else {
-          console.log(`User ${publicUser.username} is synced - modified at:`, row.doc.instanceMetadata?.lastModifiedAt, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
+          console.log(`User ${publicUser.username} is synced - modified at:`, row.doc.instance_metadata?.last_modified_at, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
           publicUser.syncStatus = 'synced';
         }
       } catch (error) {
@@ -162,9 +162,9 @@ router.get('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     
     // Calculate user stats with proper priority: disabled > unverified > active
     const userStats = {
-      activeUsers: users.filter(user => user.enabled && user.emailVerified).length,
+      activeUsers: users.filter(user => user.enabled && user.email_verified).length,
       disabledUsers: users.filter(user => !user.enabled).length,
-      unverifiedUsers: users.filter(user => user.enabled && !user.emailVerified).length,
+      unverifiedUsers: users.filter(user => user.enabled && !user.email_verified).length,
       totalUsers: users.length
     };
     
@@ -239,24 +239,24 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       username,
       email,
       passwordHash,
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
+      first_name: firstName || undefined,
+      last_name: lastName || undefined,
       groups: groups ? groups.split(',').map(g => g.trim()).filter(g => g) : [],
       roles: roles ? roles.split(',').map(r => r.trim()).filter(r => r) : [],
       enabled: enabled === 'on',
-      emailVerified: emailVerified === 'on'
+      email_verified: emailVerified === 'on'
     });
     
     await user.save();
     
     // Log activity
     await Activity.logActivity('user_created', {
-      targetUsername: user.username,
-      targetUserId: user._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: user.username,
+      target_user_id: user._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.redirect('/users?message=User created successfully&messageType=success');
@@ -354,23 +354,23 @@ router.put('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
     
     // Update user
     user.email = email;
-    user.firstName = firstName || undefined;
-    user.lastName = lastName || undefined;
+    user.first_name = firstName || undefined;
+    user.last_name = lastName || undefined;
     user.groups = groups ? groups.split(',').map(g => g.trim()).filter(g => g) : [];
     user.roles = roles ? roles.split(',').map(r => r.trim()).filter(r => r) : [];
     user.enabled = enabled === 'on';
-    user.emailVerified = emailVerified === 'on';
+    user.email_verified = emailVerified === 'on';
     
     await user.save();
     
     // Log activity
     await Activity.logActivity('user_updated', {
-      targetUsername: user.username,
-      targetUserId: user._id,
-      adminUserId: req.oidc_user?.sub,
-      adminUsername: req.oidc_user?.username,
+      target_username: user.username,
+      target_user_id: user._id,
+      admin_user_id: req.oidc_user?.sub,
+      admin_username: req.oidc_user?.username,
       ip: getClientIp(req),
-      userAgent: req.headers['user-agent']
+      user_agent: req.headers['user-agent']
     });
     
     res.redirect('/users?message=User updated successfully&messageType=success');
@@ -403,7 +403,7 @@ router.get('/sessions', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     
     const sessionsWithUsers = await Promise.all(result.rows.map(async row => {
       const session = new Session(row.doc);
-      const user = await User.findById(session.userId);
+      const user = await User.findById(session.user_id);
       const sessionData = {
         ...session.toPublicJSON(),
         user: user ? user.toPublicJSON() : { username: 'Unknown', email: 'Unknown' },
@@ -417,10 +417,10 @@ router.get('/sessions', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       }
       // Check if this session record is isolated using the raw document
       else if (clusterHealth.isRecordIsolated(row.doc)) {
-        console.log(`Session ${sessionData.id} for user ${sessionData.user.username} is isolated - modified at:`, row.doc.instanceMetadata?.lastModifiedAt);
+        console.log(`Session ${sessionData.id} for user ${sessionData.user.username} is isolated - modified at:`, row.doc.instance_metadata?.last_modified_at);
         sessionData.syncStatus = 'isolated';
       } else {
-        console.log(`Session ${sessionData.id} for user ${sessionData.user.username} is synced - modified at:`, row.doc.instanceMetadata?.lastModifiedAt, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
+        console.log(`Session ${sessionData.id} for user ${sessionData.user.username} is synced - modified at:`, row.doc.instance_metadata?.last_modified_at, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
         sessionData.syncStatus = 'synced';
       }
       
@@ -473,21 +473,21 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       
       // Check for actual CouchDB conflicts first
       if (row.doc._conflicts && row.doc._conflicts.length > 0) {
-        console.log(`Client ${client.clientId} has conflicts:`, row.doc._conflicts);
+        console.log(`Client ${client.client_id} has conflicts:`, row.doc._conflicts);
         client.syncStatus = 'conflict';
       }
       // Check if this client record is isolated using the raw document
       else if (clusterHealth.isRecordIsolated(row.doc)) {
-        console.log(`Client ${client.clientId} is isolated - modified at:`, row.doc.instanceMetadata?.lastModifiedAt);
+        console.log(`Client ${client.client_id} is isolated - modified at:`, row.doc.instance_metadata?.last_modified_at);
         client.syncStatus = 'isolated';
       } else {
-        console.log(`Client ${client.clientId} is synced - modified at:`, row.doc.instanceMetadata?.lastModifiedAt, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
+        console.log(`Client ${client.client_id} is synced - modified at:`, row.doc.instance_metadata?.last_modified_at, 'isolation start:', global.clusterIsolationState.isolationStartTime?.toISOString());
         client.syncStatus = 'synced';
       }
       
-      console.log(`Client ${client.clientId} final syncStatus:`, client.syncStatus);
-      console.log(`Client ${client.clientId} has syncStatus property:`, 'syncStatus' in client);
-      console.log(`Client ${client.clientId} object keys:`, Object.keys(client));
+      console.log(`Client ${client.client_id} final syncStatus:`, client.syncStatus);
+      console.log(`Client ${client.client_id} has syncStatus property:`, 'syncStatus' in client);
+      console.log(`Client ${client.client_id} object keys:`, Object.keys(client));
       return client;
     });
     
@@ -497,8 +497,8 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       throw new Error('ZOMBIE_ADMIN_CLIENT_ID environment variable must be set for security');
     }
     const sortedClients = clients.sort((a, b) => {
-      if (a.clientId === defaultClientId) return -1;
-      if (b.clientId === defaultClientId) return 1;
+      if (a.client_id === defaultClientId) return -1;
+      if (b.client_id === defaultClientId) return 1;
       return a.name.localeCompare(b.name);
     });
     
@@ -515,7 +515,7 @@ router.get('/clients', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       isClients: true,
       clients: sortedClients.map(client => {
         const clientJson = client.toSafeJSON();
-        clientJson.isDefaultClient = client.clientId === defaultClientId;
+        clientJson.isDefaultClient = client.client_id === defaultClientId;
         return clientJson;
       }),
       clientStats
@@ -826,7 +826,7 @@ router.get('/conflicts/client/:id', oidcAuth.requireOidcAuth('admin'), async (re
       isClients: true,
       entityType: 'client',
       entityId: clientId,
-      entityName: currentClient.name || currentClient.clientId,
+      entityName: currentClient.name || currentClient.client_id,
       currentVersion,
       conflictVersions: validConflictVersions,
       allVersions
@@ -852,7 +852,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
     
     // Get current version
     const currentSession = new Session(docWithConflicts);
-    const currentUser = await User.findById(currentSession.userId);
+    const currentUser = await User.findById(currentSession.user_id);
     const currentVersion = {
       version: 'current',
       rev: docWithConflicts._rev,
@@ -869,7 +869,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
         try {
           const conflictDoc = await db.get(sessionId, { rev: conflictRev });
           const conflictSession = new Session(conflictDoc);
-          const conflictUser = await User.findById(conflictSession.userId);
+          const conflictUser = await User.findById(conflictSession.user_id);
           return {
             version: 'conflict',
             rev: conflictRev,
@@ -896,7 +896,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
       isSessions: true,
       entityType: 'session',
       entityId: sessionId,
-      entityName: `${currentVersion.session.user.username} - ${currentVersion.session.clientId}`,
+      entityName: `${currentVersion.session.user.username} - ${currentVersion.session.client_id}`,
       currentVersion,
       conflictVersions: validConflictVersions,
       allVersions
@@ -942,11 +942,11 @@ router.post('/conflicts/:entityType/:id/resolve', oidcAuth.requireOidcAuth('admi
       }
       
       // Update instance metadata to mark as resolved and create a new revision
-      resolvedDoc.instanceMetadata = {
-        ...resolvedDoc.instanceMetadata,
-        lastModifiedBy: process.env.INSTANCE_ID || 'conflict-resolver',
-        lastModifiedAt: new Date().toISOString(),
-        version: (resolvedDoc.instanceMetadata?.version || 1) + 1
+      resolvedDoc.instance_metadata = {
+        ...resolvedDoc.instance_metadata,
+        last_modified_by: process.env.INSTANCE_ID || 'conflict-resolver',
+        last_modified_at: new Date().toISOString(),
+        version: (resolvedDoc.instance_metadata?.version || 1) + 1
       };
       
       // Add a resolution marker to help track this was manually resolved

@@ -8,12 +8,12 @@ class Activity {
     this.timestamp = data.timestamp || new Date().toISOString();
     this.action = data.action; // 'login', 'logout', 'user_created', 'user_updated', 'user_disabled', 'user_deleted', 'password_reset', 'session_invalidated'
     this.username = data.username;
-    this.targetUserId = data.targetUserId; // For admin actions on other users
-    this.targetUsername = data.targetUsername;
+    this.target_user_id = data.target_user_id; // For admin actions on other users
+    this.target_username = data.target_username;
     this.ip = data.ip;
-    this.userAgent = data.userAgent;
-    this.adminUserId = data.adminUserId; // ID of admin who performed the action
-    this.adminUsername = data.adminUsername; // Username of admin who performed the action
+    this.user_agent = data.user_agent;
+    this.admin_user_id = data.admin_user_id; // ID of admin who performed the action
+    this.admin_username = data.admin_username; // Username of admin who performed the action
     this.details = data.details; // Additional details about the action
   }
 
@@ -42,12 +42,12 @@ class Activity {
       timestamp: this.timestamp,
       action: this.action,
       username: this.username,
-      targetUserId: this.targetUserId,
-      targetUsername: this.targetUsername,
+      target_user_id: this.target_user_id,
+      target_username: this.target_username,
       ip: this.ip,
-      userAgent: this.userAgent,
-      adminUserId: this.adminUserId,
-      adminUsername: this.adminUsername,
+      user_agent: this.user_agent,
+      admin_user_id: this.admin_user_id,
+      admin_username: this.admin_username,
       details: this.details
     };
   }
@@ -58,9 +58,9 @@ class Activity {
       timestamp: this.timestamp,
       action: this.action,
       username: this.username,
-      targetUsername: this.targetUsername,
+      target_username: this.target_username,
       ip: this.ip,
-      adminUsername: this.adminUsername,
+      admin_username: this.admin_username,
       details: this.details,
       actionType: this.getActionType()
     };
@@ -135,7 +135,7 @@ class Activity {
 
           const userActivities = allResult.rows
             .map(row => new Activity(row.doc))
-            .filter(activity => activity.targetUserId === userId || activity.adminUserId === userId)
+            .filter(activity => activity.target_user_id === userId || activity.admin_user_id === userId)
             .slice(0, limit);
 
           return userActivities;
@@ -151,12 +151,12 @@ class Activity {
     const activity = new Activity({
       action,
       username: data.username,
-      targetUserId: data.targetUserId,
-      targetUsername: data.targetUsername,
+      target_user_id: data.target_user_id,
+      target_username: data.target_username,
       ip: data.ip,
-      userAgent: data.userAgent,
-      adminUserId: data.adminUserId,
-      adminUsername: data.adminUsername,
+      user_agent: data.user_agent,
+      admin_user_id: data.admin_user_id,
+      admin_username: data.admin_username,
       details: data.details
     });
 

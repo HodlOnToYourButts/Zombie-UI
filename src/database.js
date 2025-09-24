@@ -52,8 +52,6 @@ class Database {
         }
       }
 
-      // Ensure views exist (in case database existed but views didn't)
-      await this.ensureViewsExist();
 
       // Run database setup for Zombie UI
       await this.ensureZombieUIClientExists();
@@ -86,69 +84,6 @@ class Database {
     }
   }
 
-  async ensureViewsExist() {
-    console.log('🔍 Ensuring CouchDB views exist...');
-
-    const views = {
-      users: {
-        by_email: 'function(doc) { if (doc.type === "user" && doc.email) { emit(doc.email, doc); } }',
-        by_username: 'function(doc) { if (doc.type === "user" && doc.username) { emit(doc.username, doc); } }'
-      },
-      sessions: {
-        by_user_id: 'function(doc) { if (doc.type === "session" && doc.userId) { emit(doc.userId, doc); } }',
-        by_auth_code: 'function(doc) { if (doc.type === "session" && doc.authorizationCode) { emit(doc.authorizationCode, doc); } }',
-        active_sessions: 'function(doc) { if (doc.type === "session" && doc.active) { emit(doc.userId, doc); } }'
-      },
-      activities: {
-        by_timestamp: 'function(doc) { if (doc.type === "activity" && doc.timestamp) { emit(doc.timestamp, doc); } }',
-        by_target_user: 'function(doc) { if (doc.type === "activity" && doc.targetUserId) { emit(doc.targetUserId, doc); } }'
-      },
-      clients: {
-        by_client_id: 'function(doc) { if (doc.type === "client" && doc.clientId) { emit(doc.clientId, doc); } }',
-        by_name: 'function(doc) { if (doc.type === "client" && doc.name) { emit(doc.name, doc); } }',
-        enabled_clients: 'function(doc) { if (doc.type === "client" && doc.enabled) { emit(doc.name, doc); } }'
-      }
-    };
-
-    for (const [designName, viewFunctions] of Object.entries(views)) {
-      await this.createDesignDoc(designName, viewFunctions);
-    }
-
-    console.log('✅ All views are available');
-  }
-
-  async createDesignDoc(designName, viewFunctions) {
-    const designDocId = `_design/${designName}`;
-
-    try {
-      // Check if design document already exists
-      await this.db.get(designDocId);
-      console.log(`📊 View already exists: ${designName}`);
-      return;
-    } catch (error) {
-      if (error.statusCode !== 404) {
-        throw error;
-      }
-    }
-
-    // Create the design document
-    const designDoc = {
-      _id: designDocId,
-      views: {}
-    };
-
-    for (const [viewName, mapFunction] of Object.entries(viewFunctions)) {
-      designDoc.views[viewName] = { map: mapFunction };
-    }
-
-    try {
-      await this.db.insert(designDoc);
-      console.log(`✅ Created view: ${designName}`);
-    } catch (error) {
-      console.error(`❌ Failed to create view ${designName}:`, error.message);
-      throw error;
-    }
-  }
 
   async ensureZombieUIClientExists() {
     console.log('🔍 Checking for Zombie UI OIDC client...');
