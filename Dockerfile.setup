@@ -1,0 +1,20 @@
+FROM alpine:3.19
+
+# Install required packages
+RUN apk add --no-cache curl
+
+# Create app directory and user
+WORKDIR /app
+RUN addgroup -g 1001 -S setupuser && \
+    adduser -S setupuser -u 1001 -G setupuser
+
+# Copy setup script
+COPY scripts/zombie-ui-setup.sh ./zombie-ui-setup.sh
+RUN chmod +x zombie-ui-setup.sh && \
+    chown setupuser:setupuser zombie-ui-setup.sh
+
+# Switch to non-root user
+USER setupuser
+
+# Run the setup script
+ENTRYPOINT ["./zombie-ui-setup.sh"]

@@ -4,16 +4,22 @@ class Database {
   constructor() {
     const username = process.env.COUCHDB_USER || 'zombie';
     const password = process.env.COUCHDB_PASSWORD;
-    const host = process.env.COUCHDB_HOST || 'localhost';
-    const port = process.env.COUCHDB_PORT || '5984';
-    
+
     if (!password) {
       console.error('COUCHDB_PASSWORD environment variable is required');
       process.exit(1);
     }
-    
-    // CouchDB URL for this instance
-    const couchUrl = `http://${host}:${port}`;
+
+    // CouchDB URL for this instance - support both COUCHDB_URL and legacy COUCHDB_HOST/PORT
+    let couchUrl;
+    if (process.env.COUCHDB_URL) {
+      couchUrl = process.env.COUCHDB_URL;
+    } else {
+      const host = process.env.COUCHDB_HOST || 'localhost';
+      const port = process.env.COUCHDB_PORT || '5984';
+      couchUrl = `http://${host}:${port}`;
+    }
+
     this.couchUrl = couchUrl.replace('://', `://${username}:${password}@`);
     
     this.dbName = process.env.COUCHDB_DATABASE || 'zombie';

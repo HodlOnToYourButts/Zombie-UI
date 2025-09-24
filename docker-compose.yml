@@ -30,7 +30,7 @@ services:
     image: ghcr.io/hodlontoyourbutts/replication-monitor:latest
     container_name: replication-monitor
     env_file:
-      - .env.dev.replication-monitor  # Use replication monitor environment file
+      - .env.dev.couchdb  # Use CouchDB environment file
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -40,19 +40,16 @@ services:
 
   # Zombie UI Setup Container
   zombie-ui-setup:
-    image: docker.io/alpine:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.setup
     container_name: zombie-ui-setup
     environment:
       - COUCHDB_URL=http://couchdb:5984
       - COUCHDB_DATABASE=zombie
       - COUCHDB_USER=zombie
       - COUCHDB_PASSWORD=zombie
-    depends_on:
-      - replication-monitor
     restart: "no"
-    volumes:
-      - ./scripts:/scripts
-    command: sh -c "apk add --no-cache curl && /scripts/zombie-ui-setup.sh"
 
 networks:
   default:

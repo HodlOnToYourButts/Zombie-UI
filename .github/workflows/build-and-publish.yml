@@ -18,6 +18,15 @@ jobs:
       contents: read
       packages: write
       id-token: write
+    strategy:
+      matrix:
+        include:
+          - dockerfile: Dockerfile
+            image-suffix: ""
+            context: .
+          - dockerfile: Dockerfile.setup
+            image-suffix: "-setup"
+            context: .
 
     steps:
     - name: Checkout repository
@@ -38,7 +47,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.image-suffix }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -51,7 +60,8 @@ jobs:
       id: build-and-push
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ${{ matrix.context }}
+        file: ${{ matrix.dockerfile }}
         platforms: linux/amd64,linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
