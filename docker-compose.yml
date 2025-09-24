@@ -38,18 +38,6 @@ services:
       timeout: 10s
       retries: 5
 
-  # Zombie UI Setup Container
-  zombie-ui-setup:
-    build:
-      context: .
-      dockerfile: Dockerfile.setup
-    container_name: zombie-ui-setup
-    environment:
-      - COUCHDB_URL=http://couchdb:5984
-      - COUCHDB_DATABASE=zombie
-      - COUCHDB_USER=zombie
-      - COUCHDB_PASSWORD=zombie
-    restart: "no"
 
 networks:
   default:

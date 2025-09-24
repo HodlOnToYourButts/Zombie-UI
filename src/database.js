@@ -53,10 +53,10 @@ class Database {
       // Ensure views exist (in case database existed but views didn't)
       await this.ensureViewsExist();
 
-      // In development mode, ensure admin user exists
-      if (process.env.DEVELOPMENT_MODE === 'true') {
-        await this.ensureAdminUserExists();
-      }
+      // Run database setup for Zombie UI
+      const DatabaseSetup = require('./database-setup');
+      const setup = new DatabaseSetup(this);
+      await setup.runSetup();
 
       console.log(`✅ Database initialization complete: ${this.dbName}`);
       return true;
@@ -149,57 +149,6 @@ class Database {
     }
   }
 
-  async ensureAdminUserExists() {
-    console.log('🔍 Checking for admin user in development mode...');
-
-    try {
-      // Check if admin user already exists
-      const result = await this.db.view('users', 'by_username', {
-        key: 'admin',
-        include_docs: true
-      });
-
-      if (result.rows.length > 0) {
-        console.log('👤 Admin user already exists');
-        return;
-      }
-
-      console.log('👤 Creating development admin user (admin/admin)...');
-
-      // Import bcrypt for password hashing
-      const bcrypt = require('bcryptjs');
-      const passwordHash = await bcrypt.hash('admin', 12);
-
-      const adminUser = {
-        _id: `user_${require('crypto').randomBytes(12).toString('hex')}`,
-        type: 'user',
-        username: 'admin',
-        email: 'admin@zombie.local',
-        passwordHash: passwordHash,
-        firstName: 'System',
-        lastName: 'Administrator',
-        groups: ['admin'],
-        roles: ['admin', 'user'],
-        enabled: true,
-        emailVerified: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        instanceMetadata: {
-          lastModifiedBy: this.instanceId,
-          lastModifiedAt: new Date().toISOString(),
-          version: 1
-        }
-      };
-
-      await this.db.insert(adminUser);
-      console.log('✅ Development admin user created (username: admin, password: admin)');
-      console.log('⚠️  Remember to change these credentials in production!');
-
-    } catch (error) {
-      console.error('❌ Failed to create admin user:', error.message);
-      // Don't throw - this is a convenience feature, not critical
-    }
-  }
 
   async waitForCouchDB() {
     const maxRetries = 30;
