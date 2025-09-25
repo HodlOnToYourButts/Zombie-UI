@@ -113,7 +113,7 @@
 
     <footer class="bg-light text-center text-muted py-3 mt-5">
         <div class="container">
-            <small>Zombie v0.1.0 - <em>Self-service portal for managing your account.</em></small>
+            <small>Zombie v0.1.0 - <em>Still authenticating users when everything else is dead.</em></small>
         </div>
     </footer>
 
@@ -126,20 +126,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             const zombieLogo = document.querySelector('.navbar-brand');
 
-            // Check if user came from admin context
-            const referrer = document.referrer;
-            const currentAdminContext = sessionStorage.getItem('adminContext') === 'true';
+            // Check current path to determine context
+            const currentPath = window.location.pathname;
 
-            // Set admin context if coming from admin page
-            if (referrer && referrer.includes('/admin')) {
-                sessionStorage.setItem('adminContext', 'true');
-            }
-
-            // Update logo link based on context
-            if (sessionStorage.getItem('adminContext') === 'true') {
-                zombieLogo.href = '/admin';
-            } else {
+            // If we're on a user page (not admin), clear admin context
+            if (!currentPath.startsWith('/admin')) {
+                sessionStorage.removeItem('adminContext');
                 zombieLogo.href = '/';
+            } else {
+                // We're on an admin page, set admin context
+                sessionStorage.setItem('adminContext', 'true');
+                zombieLogo.href = '/admin';
             }
 
             // Clear admin context when explicitly going to dashboard
