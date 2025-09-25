@@ -31,11 +31,11 @@ This guide explains how to run Zombie UI using Docker Compose for development an
    OIDC_END_SESSION_ENDPOINT=https://your-oidc-provider.com/logout
 
    # Required: Update client credentials
-   ZOMBIE_ADMIN_CLIENT_ID=your-client-id
-   ZOMBIE_ADMIN_CLIENT_SECRET=your-client-secret
+   CLIENT_ID=your-client-id
+   CLIENT_SECRET=your-client-secret
 
    # Required: Generate a secure session secret
-   ZOMBIE_ADMIN_SESSION_SECRET=your-secure-session-secret
+   SESSION_SECRET=your-secure-session-secret
    ```
 
 3. **Start the services**:

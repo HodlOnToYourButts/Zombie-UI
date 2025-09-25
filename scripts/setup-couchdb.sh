@@ -17,11 +17,11 @@
 # - COUCHDB_USER (default: zombie)
 # - COUCHDB_PASSWORD
 # - COUCHDB_DATABASE (default: zombie)
-# - ZOMBIE_ADMIN_CLIENT_ID (OIDC client ID for admin auth)
-# - ZOMBIE_ADMIN_CLIENT_SECRET (OIDC client secret for admin auth)
-# - ZOMBIE_ADMIN_USERNAME (admin user login)
-# - ZOMBIE_ADMIN_PASSWORD (admin user password)
-# - ZOMBIE_ADMIN_EMAIL (optional, defaults to username@zombie.local)
+# - CLIENT_ID (OIDC client ID for admin auth)
+# - CLIENT_SECRET (OIDC client secret for admin auth)
+# - ADMIN_USERNAME (admin user login)
+# - ADMIN_PASSWORD (admin user password)
+# - ADMIN_EMAIL (optional, defaults to username@zombie.local)
 
 set -euo pipefail
 
@@ -44,11 +44,11 @@ COUCHDB_PORT="${COUCHDB_PORT:-5984}"
 COUCHDB_USER="${COUCHDB_USER:-zombie}"
 COUCHDB_PASSWORD="${COUCHDB_PASSWORD:-}"
 COUCHDB_DATABASE="${COUCHDB_DATABASE:-zombie}"
-ZOMBIE_ADMIN_CLIENT_ID="${ZOMBIE_ADMIN_CLIENT_ID:-}"
-ZOMBIE_ADMIN_CLIENT_SECRET="${ZOMBIE_ADMIN_CLIENT_SECRET:-}"
-ZOMBIE_ADMIN_USERNAME="${ZOMBIE_ADMIN_USERNAME:-}"
-ZOMBIE_ADMIN_PASSWORD="${ZOMBIE_ADMIN_PASSWORD:-}"
-ZOMBIE_ADMIN_EMAIL="${ZOMBIE_ADMIN_EMAIL:-${ZOMBIE_ADMIN_USERNAME}@zombie.local}"
+CLIENT_ID="${CLIENT_ID:-}"
+CLIENT_SECRET="${CLIENT_SECRET:-}"
+ADMIN_USERNAME="${ADMIN_USERNAME:-}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
+ADMIN_EMAIL="${ADMIN_EMAIL:-${ADMIN_USERNAME}@zombie.local}"
 
 # Construct CouchDB URL (allow override with COUCHDB_URL)
 if [[ -n "$COUCHDB_URL" ]]; then
@@ -66,31 +66,31 @@ if [[ -z "$COUCHDB_PASSWORD" ]]; then
     exit 1
 fi
 
-if [[ -z "$ZOMBIE_ADMIN_CLIENT_ID" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_ID is required for admin authentication${NC}"
+if [[ -z "$CLIENT_ID" ]]; then
+    echo -e "${RED}❌ ERROR: CLIENT_ID is required for admin authentication${NC}"
     echo "   Generate with: echo \"client_\$(openssl rand -hex 16)\""
     exit 1
 fi
 
-if [[ -z "$ZOMBIE_ADMIN_CLIENT_SECRET" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_SECRET is required for admin authentication${NC}"
+if [[ -z "$CLIENT_SECRET" ]]; then
+    echo -e "${RED}❌ ERROR: CLIENT_SECRET is required for admin authentication${NC}"
     echo "   Generate with: openssl rand -base64 32"
     exit 1
 fi
 
-if [[ -z "$ZOMBIE_ADMIN_USERNAME" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_USERNAME is required${NC}"
+if [[ -z "$ADMIN_USERNAME" ]]; then
+    echo -e "${RED}❌ ERROR: ADMIN_USERNAME is required${NC}"
     exit 1
 fi
 
-if [[ -z "$ZOMBIE_ADMIN_PASSWORD" ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_PASSWORD is required${NC}"
+if [[ -z "$ADMIN_PASSWORD" ]]; then
+    echo -e "${RED}❌ ERROR: ADMIN_PASSWORD is required${NC}"
     exit 1
 fi
 
 # Validate CLIENT_ID format
-if [[ ! "$ZOMBIE_ADMIN_CLIENT_ID" =~ ^client_[a-f0-9]{32}$ ]]; then
-    echo -e "${RED}❌ ERROR: ZOMBIE_ADMIN_CLIENT_ID must follow format 'client_<32_hex_chars>'${NC}"
+if [[ ! "$CLIENT_ID" =~ ^client_[a-f0-9]{32}$ ]]; then
+    echo -e "${RED}❌ ERROR: CLIENT_ID must follow format 'client_<32_hex_chars>'${NC}"
     echo "   Generate with: echo \"client_\$(openssl rand -hex 16)\""
     exit 1
 fi
@@ -105,8 +105,8 @@ echo "🔧 Configuration:"
 echo "   Database: ${COUCHDB_DATABASE}"
 echo "   CouchDB:  ${COUCHDB_URL}"
 echo "   User:     ${COUCHDB_USER}"
-echo "   Client:   ${ZOMBIE_ADMIN_CLIENT_ID}"
-echo "   Admin:    ${ZOMBIE_ADMIN_USERNAME}"
+echo "   Client:   ${CLIENT_ID}"
+echo "   Admin:    ${ADMIN_USERNAME}"
 
 # Test CouchDB connection
 echo ""
@@ -212,18 +212,18 @@ echo ""
 echo "🔐 Creating OIDC client for admin authentication..."
 
 # Check if client already exists
-CLIENT_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/clients/_view/by_client_id?key=\"${ZOMBIE_ADMIN_CLIENT_ID}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
+CLIENT_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/clients/_view/by_client_id?key=\"${CLIENT_ID}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
 
 if [[ "$CLIENT_EXISTS" -gt "0" ]]; then
-    echo -e "   ${YELLOW}- OIDC client already exists: ${ZOMBIE_ADMIN_CLIENT_ID}${NC}"
+    echo -e "   ${YELLOW}- OIDC client already exists: ${CLIENT_ID}${NC}"
 else
-    echo "   Creating OIDC client: ${ZOMBIE_ADMIN_CLIENT_ID}"
+    echo "   Creating OIDC client: ${CLIENT_ID}"
     
     CLIENT_DOC="{
         \"_id\": \"client_$(openssl rand -hex 12)\",
         \"type\": \"client\",
-        \"clientId\": \"${ZOMBIE_ADMIN_CLIENT_ID}\",
-        \"clientSecret\": \"${ZOMBIE_ADMIN_CLIENT_SECRET}\",
+        \"clientId\": \"${CLIENT_ID}\",
+        \"clientSecret\": \"${CLIENT_SECRET}\",
         \"name\": \"Zombie - Admin Interface\",
         \"description\": \"OIDC client for Zombie admin interface authentication\",
         \"redirectUris\": [
@@ -255,12 +255,12 @@ echo ""
 echo "👤 Creating admin user..."
 
 # Check if admin user already exists
-ADMIN_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/users/_view/by_username?key=\"${ZOMBIE_ADMIN_USERNAME}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
+ADMIN_EXISTS=$(curl -s "${COUCHDB_AUTH_URL}/${COUCHDB_DATABASE}/_design/users/_view/by_username?key=\"${ADMIN_USERNAME}\"" | grep -o '"total_rows":[0-9]*' | cut -d: -f2)
 
 if [[ "$ADMIN_EXISTS" -gt "0" ]]; then
-    echo -e "   ${YELLOW}- Admin user already exists: ${ZOMBIE_ADMIN_USERNAME}${NC}"
+    echo -e "   ${YELLOW}- Admin user already exists: ${ADMIN_USERNAME}${NC}"
 else
-    echo "   Creating admin user: ${ZOMBIE_ADMIN_USERNAME}"
+    echo "   Creating admin user: ${ADMIN_USERNAME}"
     
     # Generate password hash using Node.js (since we need bcrypt)
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -275,7 +275,7 @@ else
     
     PASSWORD_HASH=$(cd "$PROJECT_DIR" && node -e "
         const bcrypt = require('bcrypt');
-        const hash = bcrypt.hashSync('${ZOMBIE_ADMIN_PASSWORD}', 12);
+        const hash = bcrypt.hashSync('${ADMIN_PASSWORD}', 12);
         console.log(hash);
     " 2>/dev/null || echo "")
     
@@ -287,8 +287,8 @@ else
     ADMIN_DOC="{
         \"_id\": \"user_$(openssl rand -hex 12)\",
         \"type\": \"user\",
-        \"username\": \"${ZOMBIE_ADMIN_USERNAME}\",
-        \"email\": \"${ZOMBIE_ADMIN_EMAIL}\",
+        \"username\": \"${ADMIN_USERNAME}\",
+        \"email\": \"${ADMIN_EMAIL}\",
         \"passwordHash\": \"${PASSWORD_HASH}\",
         \"firstName\": \"System\",
         \"lastName\": \"Administrator\",
@@ -304,7 +304,7 @@ else
         -H "Content-Type: application/json" \
         -d "$ADMIN_DOC" | grep -q '"ok":true'; then
         echo -e "   ${GREEN}✓ Admin user created successfully${NC}"
-        echo -e "   🔑 Login credentials: ${ZOMBIE_ADMIN_USERNAME}"
+        echo -e "   🔑 Login credentials: ${ADMIN_USERNAME}"
     else
         echo -e "   ${RED}❌ Failed to create admin user${NC}"
         exit 1
@@ -325,6 +325,6 @@ echo "   COUCHDB_PORT=${COUCHDB_PORT}"
 echo "   COUCHDB_USER=${COUCHDB_USER}"
 echo "   COUCHDB_PASSWORD=<your-password>"
 echo "   COUCHDB_DATABASE=${COUCHDB_DATABASE}"
-echo "   CLIENT_ID=${ZOMBIE_ADMIN_CLIENT_ID}"
+echo "   CLIENT_ID=${CLIENT_ID}"
 echo "   CLIENT_SECRET=<your-client-secret>"
 echo ""
