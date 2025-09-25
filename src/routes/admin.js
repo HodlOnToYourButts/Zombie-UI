@@ -259,7 +259,7 @@ router.post('/users', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
       user_agent: req.headers['user-agent']
     });
     
-    res.redirect('/users?message=User created successfully&messageType=success');
+    res.redirect('/admin/users?message=User created successfully&messageType=success');
   } catch (error) {
     console.error('Create user error:', error);
     res.render('user-form', addUserContext(req, {
@@ -278,7 +278,7 @@ router.get('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
     const userId = decodeURIComponent(req.params.id);
     const user = await User.findById(userId);
     if (!user) {
-      return res.redirect('/users?message=User not found&messageType=danger');
+      return res.redirect('/admin/users?message=User not found&messageType=danger');
     }
     
     // Get user sessions - only truly active ones for the sidebar
@@ -302,7 +302,7 @@ router.get('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
     }));
   } catch (error) {
     console.error('View user error:', error);
-    res.redirect('/users?message=Error loading user: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/users?message=Error loading user: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -312,7 +312,7 @@ router.get('/users/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, res
     const userId = decodeURIComponent(req.params.id);
     const user = await User.findById(userId);
     if (!user) {
-      return res.redirect('/users?message=User not found&messageType=danger');
+      return res.redirect('/admin/users?message=User not found&messageType=danger');
     }
     
     res.render('user-form', addUserContext(req, {
@@ -322,7 +322,7 @@ router.get('/users/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, res
     }));
   } catch (error) {
     console.error('Edit user error:', error);
-    res.redirect('/users?message=Error loading user: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/users?message=Error loading user: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -333,7 +333,7 @@ router.put('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
     const userId = decodeURIComponent(req.params.id);
     const user = await User.findById(userId);
     if (!user) {
-      return res.redirect('/users?message=User not found&messageType=danger');
+      return res.redirect('/admin/users?message=User not found&messageType=danger');
     }
     
     const { email, firstName, lastName, groups, roles, enabled, emailVerified } = req.body;
@@ -373,7 +373,7 @@ router.put('/users/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) => 
       user_agent: req.headers['user-agent']
     });
     
-    res.redirect('/users?message=User updated successfully&messageType=success');
+    res.redirect('/admin/users?message=User updated successfully&messageType=success');
   } catch (error) {
     console.error('Update user error:', error);
     const user = await User.findById(req.params.id);
@@ -596,7 +596,7 @@ router.post('/clients', oidcAuth.requireOidcAuth('admin'), preprocessClientData,
       userAgent: req.headers['user-agent']
     });
     
-    res.redirect('/clients?message=Client created successfully&messageType=success');
+    res.redirect('/admin/clients?message=Client created successfully&messageType=success');
   } catch (error) {
     console.error('Create client error:', error);
     res.render('client-form', addUserContext(req, {
@@ -615,9 +615,9 @@ router.get('/clients/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, r
     const clientId = decodeURIComponent(req.params.id);
     const client = await Client.findById(clientId);
     if (!client) {
-      return res.redirect('/clients?message=Client not found&messageType=danger');
+      return res.redirect('/admin/clients?message=Client not found&messageType=danger');
     }
-    
+
     res.render('client-form', addUserContext(req, {
       title: 'Edit Client',
       isClients: true,
@@ -626,7 +626,7 @@ router.get('/clients/:id/edit', oidcAuth.requireOidcAuth('admin'), async (req, r
     }));
   } catch (error) {
     console.error('Edit client error:', error);
-    res.redirect('/clients?message=Error loading client: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/clients?message=Error loading client: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -636,9 +636,9 @@ router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), preprocessClientDa
     const clientId = decodeURIComponent(req.params.id);
     const client = await Client.findById(clientId);
     if (!client) {
-      return res.redirect('/clients?message=Client not found&messageType=danger');
+      return res.redirect('/admin/clients?message=Client not found&messageType=danger');
     }
-    
+
     const { name, description, redirectUris, scopes, grantTypes, responseTypes, confidential, enabled } = req.body;
     
     if (!name || !redirectUris) {
@@ -674,7 +674,7 @@ router.put('/clients/:id', oidcAuth.requireOidcAuth('admin'), preprocessClientDa
       userAgent: req.headers['user-agent']
     });
     
-    res.redirect('/clients?message=Client updated successfully&messageType=success');
+    res.redirect('/admin/clients?message=Client updated successfully&messageType=success');
   } catch (error) {
     console.error('Update client error:', error);
     const client = await Client.findById(req.params.id);
@@ -695,7 +695,7 @@ router.get('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
     const clientId = decodeURIComponent(req.params.id);
     const client = await Client.findById(clientId);
     if (!client) {
-      return res.redirect('/clients?message=Client not found&messageType=danger');
+      return res.redirect('/admin/clients?message=Client not found&messageType=danger');
     }
     
     const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -709,7 +709,7 @@ router.get('/clients/:id', oidcAuth.requireOidcAuth('admin'), async (req, res) =
     }));
   } catch (error) {
     console.error('View client error:', error);
-    res.redirect('/clients?message=Error loading client: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/clients?message=Error loading client: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -723,7 +723,7 @@ router.get('/conflicts/user/:id', oidcAuth.requireOidcAuth('admin'), async (req,
     const docWithConflicts = await db.get(userId, { conflicts: true });
     
     if (!docWithConflicts._conflicts || docWithConflicts._conflicts.length === 0) {
-      return res.redirect('/users?message=No conflicts found for this user&messageType=info');
+      return res.redirect('/admin/users?message=No conflicts found for this user&messageType=info');
     }
     
     // Get current version
@@ -772,7 +772,7 @@ router.get('/conflicts/user/:id', oidcAuth.requireOidcAuth('admin'), async (req,
     
   } catch (error) {
     console.error('View user conflicts error:', error);
-    res.redirect('/users?message=Error loading user conflicts: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/users?message=Error loading user conflicts: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -785,7 +785,7 @@ router.get('/conflicts/client/:id', oidcAuth.requireOidcAuth('admin'), async (re
     const docWithConflicts = await db.get(clientId, { conflicts: true });
     
     if (!docWithConflicts._conflicts || docWithConflicts._conflicts.length === 0) {
-      return res.redirect('/clients?message=No conflicts found for this client&messageType=info');
+      return res.redirect('/admin/clients?message=No conflicts found for this client&messageType=info');
     }
     
     // Get current version
@@ -834,7 +834,7 @@ router.get('/conflicts/client/:id', oidcAuth.requireOidcAuth('admin'), async (re
     
   } catch (error) {
     console.error('View client conflicts error:', error);
-    res.redirect('/clients?message=Error loading client conflicts: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/clients?message=Error loading client conflicts: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -847,7 +847,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
     const docWithConflicts = await db.get(sessionId, { conflicts: true });
     
     if (!docWithConflicts._conflicts || docWithConflicts._conflicts.length === 0) {
-      return res.redirect('/sessions?message=No conflicts found for this session&messageType=info');
+      return res.redirect('/admin/sessions?message=No conflicts found for this session&messageType=info');
     }
     
     // Get current version
@@ -904,7 +904,7 @@ router.get('/conflicts/session/:id', oidcAuth.requireOidcAuth('admin'), async (r
     
   } catch (error) {
     console.error('View session conflicts error:', error);
-    res.redirect('/sessions?message=Error loading session conflicts: ' + error.message + '&messageType=danger');
+    res.redirect('/admin/sessions?message=Error loading session conflicts: ' + error.message + '&messageType=danger');
   }
 });
 
@@ -990,8 +990,8 @@ router.post('/conflicts/:entityType/:id/resolve', oidcAuth.requireOidcAuth('admi
       }
       
       // Get redirect path
-      const redirectPath = entityType === 'user' ? '/users' : 
-                          entityType === 'client' ? '/clients' : '/sessions';
+      const redirectPath = entityType === 'user' ? '/admin/users' :
+                          entityType === 'client' ? '/admin/clients' : '/admin/sessions';
       
       res.redirect(`${redirectPath}?message=Conflict resolved successfully&messageType=success`);
     } else {

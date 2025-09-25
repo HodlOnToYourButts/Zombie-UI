@@ -65,7 +65,11 @@ function redirectToLogin(req, res) {
     req.session.save((err) => {
       if (err) {
         console.error('Error saving session before OIDC redirect:', err);
-        return res.status(500).send('Session error');
+        return res.status(500).render('error', {
+          title: 'Session Error',
+          message: 'Unable to save session data. Please try again.',
+          layout: false
+        });
       }
       console.log('Session saved successfully before redirect');
       console.log('- Final session state:', req.session.oidc_state);
@@ -78,7 +82,11 @@ function redirectToLogin(req, res) {
     });
   } catch (error) {
     console.error('Error redirecting to OIDC login:', error);
-    res.status(500).send('Authentication error');
+    res.status(500).render('error', {
+      title: 'Authentication Error',
+      message: 'Unable to initiate authentication. Please check your OIDC configuration.',
+      layout: false
+    });
   }
 }
 
@@ -99,7 +107,11 @@ async function handleCallback(req, res) {
 
       // Other errors are actual failures
       console.error('OIDC authentication error:', error, error_description);
-      return res.status(400).send(`Authentication failed: ${error_description || error}`);
+      return res.status(400).render('error', {
+        title: 'Authentication Failed',
+        message: `Authentication error: ${error_description || error}`,
+        layout: false
+      });
     }
     
     console.log('OIDC Callback Debug:');
@@ -141,12 +153,20 @@ async function handleCallback(req, res) {
       console.error('Invalid state parameter - state mismatch');
       console.error('Expected:', req.session.oidc_state);
       console.error('Received:', state);
-      return res.status(400).send('Invalid state parameter');
+      return res.status(400).render('error', {
+        title: 'Security Error',
+        message: 'Invalid state parameter. This could indicate a security issue or session timeout.',
+        layout: false
+      });
     }
     
     if (!code) {
       console.error('Missing authorization code');
-      return res.status(400).send('Missing authorization code');
+      return res.status(400).render('error', {
+        title: 'Authentication Error',
+        message: 'Missing authorization code from the authentication provider.',
+        layout: false
+      });
     }
     
     const clientConfig = getAdminClientConfig(req);
@@ -180,7 +200,11 @@ async function handleCallback(req, res) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error('Token exchange failed:', tokenResponse.status, errorText);
-      return res.status(400).send('Token exchange failed');
+      return res.status(400).render('error', {
+        title: 'Token Exchange Failed',
+        message: 'Failed to exchange authorization code for tokens. Please try signing in again.',
+        layout: false
+      });
     }
     
     const tokens = await tokenResponse.json();
@@ -196,7 +220,11 @@ async function handleCallback(req, res) {
     if (!userInfoResponse.ok) {
       const errorText = await userInfoResponse.text();
       console.error('UserInfo request failed:', userInfoResponse.status, errorText);
-      return res.status(400).send('UserInfo request failed');
+      return res.status(400).render('error', {
+        title: 'User Info Failed',
+        message: 'Failed to retrieve user information from the authentication provider.',
+        layout: false
+      });
     }
     
     const userInfo = await userInfoResponse.json();
@@ -223,7 +251,11 @@ async function handleCallback(req, res) {
     
   } catch (error) {
     console.error('Error handling OIDC callback:', error);
-    res.status(500).send('Authentication error');
+    res.status(500).render('error', {
+      title: 'Authentication Error',
+      message: 'An unexpected error occurred during authentication. Please try again.',
+      layout: false
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 const nano = require('nano');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 
 class Database {
   constructor() {
@@ -55,6 +56,11 @@ class Database {
 
       // Run database setup for Zombie UI
       await this.ensureZombieUIClientExists();
+
+      // Create default admin user in development mode
+      if (process.env.DEVELOPMENT_MODE === 'true') {
+        await this.ensureDefaultAdminExists();
+      }
 
       console.log(`✅ Database initialization complete: ${this.dbName}`);
       return true;
@@ -129,7 +135,7 @@ class Database {
       }
 
       const clientDoc = {
-        _id: `client_zombie_ui`,
+        _id: `client:${uuidv4()}`,
         type: 'client',
         client_id: clientId,
         client_secret: clientSecret,
@@ -162,6 +168,57 @@ class Database {
     }
   }
 
+  async ensureDefaultAdminExists() {
+    console.log('🔍 Checking for development admin user...');
+
+    try {
+      // Check if admin user already exists
+      const result = await this.db.view('users', 'by_username', {
+        key: 'admin',
+        include_docs: true
+      });
+
+      if (result.rows.length > 0) {
+        console.log('👤 Development admin user already exists');
+        return;
+      }
+
+      console.log('👤 Creating development admin user (admin/admin)...');
+
+      const passwordHash = await bcrypt.hash('admin', 12);
+
+      const adminUser = {
+        _id: `user:${uuidv4()}`,
+        type: 'user',
+        username: 'admin',
+        email: 'admin@zombie.local',
+        password_hash: passwordHash,
+        first_name: 'System',
+        last_name: 'Administrator',
+        groups: ['admin'],
+        roles: ['admin', 'user'],
+        enabled: true,
+        email_verified: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        instance_metadata: {
+          created_by: this.instanceId,
+          created_at: new Date().toISOString(),
+          last_modified_by: this.instanceId,
+          last_modified_at: new Date().toISOString(),
+          version: 1
+        }
+      };
+
+      await this.db.insert(adminUser);
+      console.log('✅ Development admin user created (username: admin, password: admin)');
+      console.log('⚠️  This is only enabled in development mode!');
+
+    } catch (error) {
+      console.error('❌ Failed to create development admin user:', error.message);
+      // Don't throw - this is a convenience feature, not critical
+    }
+  }
 
   async waitForCouchDB() {
     const maxRetries = 30;
