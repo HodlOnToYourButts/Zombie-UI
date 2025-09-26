@@ -383,6 +383,27 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--zombie-text);
 }
 
+/* List groups */
+.list-group {
+    background-color: transparent;
+}
+
+.list-group-item {
+    background-color: var(--zombie-card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--zombie-text) !important;
+}
+
+.list-group-item:hover {
+    background-color: rgba(75, 93, 35, 0.15) !important;
+}
+
+.list-group-item.active {
+    background-color: var(--bright-orange) !important;
+    border-color: var(--bright-orange) !important;
+    color: var(--zombie-text) !important;
+}
+
 /* Fix any remaining white/bright elements */
 .bg-white {
     background: var(--zombie-card-bg) !important;

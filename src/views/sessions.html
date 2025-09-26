@@ -51,7 +51,7 @@
                 <thead>
                     <tr>
                         <th>User</th>
-                        <th>Client ID</th>
+                        <th>Application</th>
                         <th>Scopes</th>
                         <th>Status</th>
                         <th>Sync</th>
@@ -69,7 +69,7 @@
                             <br>
                             <small class="text-muted">{{this.user.email}}</small>
                         </td>
-                        <td><code>{{this.client_id}}</code></td>
+                        <td>{{#if this.client_name}}{{this.client_name}}{{else}}{{this.client_id}}{{/if}}</td>
                         <td>
                             {{#each this.scopes}}
                             <span class="badge bg-light text-dark me-1">{{this}}</span>
@@ -113,15 +113,15 @@
                             {{formatDate this.created_at}}
                         </td>
                         <td class="text-muted">
-                            {{#if this.lastAccessedAt}}
-                                {{formatDate this.lastAccessedAt}}
+                            {{#if this.last_accessed_at}}
+                                {{formatDate this.last_accessed_at}}
                             {{else}}
-                                Never
+                                Not tracked
                             {{/if}}
                         </td>
                         <td class="text-muted">
-                            {{#if this.expiresAt}}
-                                {{formatDate this.expiresAt}}
+                            {{#if this.expires_at}}
+                                {{formatDate this.expires_at}}
                             {{else}}
                                 No expiry
                             {{/if}}

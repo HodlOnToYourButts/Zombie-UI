@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const Session = require('../models/Session');
 const Activity = require('../models/Activity');
+const Client = require('../models/Client');
 const oidcAuth = require('../middleware/oidc-auth');
 const { getClientIp } = require('../utils/ip-helper');
 
@@ -33,6 +34,22 @@ router.get('/', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     const allSessions = await Session.findByUserId(user._id);
     const activeSessions = allSessions.filter(session => session.active && !session.isExpired());
 
+    // Enrich sessions with client names
+    const enrichedActiveSessions = await Promise.all(
+      activeSessions.slice(0, 5).map(async (session) => {
+        const sessionData = session.toPublicJSON();
+        try {
+          const client = await Client.findByClientId(session.client_id);
+          console.log(`🔍 Dashboard client lookup for ${session.client_id}:`, client ? `Found: ${client.name}` : 'Not found');
+          sessionData.client_name = client && client.name ? client.name : `Unknown Client (${session.client_id})`;
+        } catch (error) {
+          console.error('Error looking up client:', error);
+          sessionData.client_name = `Error loading client (${session.client_id})`;
+        }
+        return sessionData;
+      })
+    );
+
     // Get recent activity for this user
     const recentActivity = await Activity.findByUserId(user._id, 10);
 
@@ -48,7 +65,7 @@ router.get('/', oidcAuth.requireOidcAuth('user'), async (req, res) => {
       user: user.toPublicJSON(),
       stats,
       recentActivity: recentActivity.map(activity => activity.toPublicJSON()),
-      activeSessions: activeSessions.slice(0, 5).map(session => session.toPublicJSON())
+      activeSessions: enrichedActiveSessions
     }));
   } catch (error) {
     console.error('User dashboard error:', error);
@@ -238,14 +255,32 @@ router.get('/sessions', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     }
 
     const allSessions = await Session.findByUserId(user._id);
-    const currentSessionId = req.sessionID;
 
-    const sessionsWithStatus = allSessions.map(session => {
-      const sessionData = session.toPublicJSON();
-      sessionData.isExpired = session.isExpired();
-      sessionData.isCurrent = sessionData.id === currentSessionId;
-      return sessionData;
-    });
+    // Sort sessions by creation time to identify the most recent one
+    allSessions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const sessionsWithStatus = await Promise.all(
+      allSessions.map(async (session, index) => {
+        const sessionData = session.toPublicJSON();
+        sessionData.isExpired = session.isExpired();
+        // Mark the most recent active, non-expired session as current
+        // Note: In OIDC, we can't perfectly match Express sessions to database sessions
+        // So we'll just mark the newest active session as "current"
+        sessionData.isCurrent = index === 0 && session.active;
+
+        // Add client name
+        try {
+          const client = await Client.findByClientId(session.client_id);
+          console.log(`🔍 Client lookup for ${session.client_id}:`, client ? `Found: ${client.name}` : 'Not found');
+          sessionData.client_name = client && client.name ? client.name : `Unknown Client (${session.client_id})`;
+        } catch (error) {
+          console.error('Error looking up client:', error);
+          sessionData.client_name = `Error loading client (${session.client_id})`;
+        }
+
+        return sessionData;
+      })
+    );
 
     const stats = {
       totalSessions: allSessions.length,

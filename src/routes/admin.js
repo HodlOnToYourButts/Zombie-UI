@@ -404,9 +404,22 @@ router.get('/sessions', oidcAuth.requireOidcAuth('admin'), async (req, res) => {
     const sessionsWithUsers = await Promise.all(result.rows.map(async row => {
       const session = new Session(row.doc);
       const user = await User.findById(session.user_id);
+
+      // Get client name
+      let clientName;
+      try {
+        const client = await Client.findByClientId(session.client_id);
+        console.log(`🔍 Admin client lookup for ${session.client_id}:`, client ? `Found: ${client.name}` : 'Not found');
+        clientName = client && client.name ? client.name : `Unknown Client (${session.client_id})`;
+      } catch (error) {
+        console.error('Error looking up client for admin sessions:', error);
+        clientName = `Error loading client (${session.client_id})`;
+      }
+
       const sessionData = {
         ...session.toPublicJSON(),
         user: user ? user.toPublicJSON() : { username: 'Unknown', email: 'Unknown' },
+        client_name: clientName,
         isExpired: session.isExpired()
       };
       
