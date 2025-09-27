@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}} - Zombie</title>
+    <title>Zombie | {{title}}</title>
     <link href="/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
     <link href="/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="/css/admin.css" rel="stylesheet">
@@ -53,18 +53,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
+                        <a class="nav-link {{#if isPassword}}active{{/if}}" href="/password">
+                            <i class="bi bi-key"></i> Password
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{#if isProfile}}active{{/if}}" href="/profile">
                             <i class="bi bi-person"></i> Profile
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{#if isSessions}}active{{/if}}" href="/sessions">
-                            <i class="bi bi-activity"></i> My Sessions
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{#if isChangePassword}}active{{/if}}" href="/change-password">
-                            <i class="bi bi-key"></i> Change Password
+                            <i class="bi bi-activity"></i> Sessions
                         </a>
                     </li>
                 </ul>

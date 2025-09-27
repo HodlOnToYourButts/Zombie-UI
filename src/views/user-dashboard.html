@@ -1,10 +1,3 @@
-<!-- Page Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">Dashboard</h1>
-        <p class="text-muted mb-0">Welcome back, {{user.username}}!</p>
-    </div>
-</div>
 
 <!-- Account Stats Cards -->
 <div class="row mb-4">
@@ -43,8 +36,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="card-title mb-0">Account Status</h5>
-                        <h6 class="mb-0">
+                        <h5 class="card-title mb-0">Status</h5>
+                        <h2 class="mb-0">
                             {{#if user.enabled}}
                                 {{#if user.email_verified}}
                                     <span class="badge bg-light text-success">Active</span>
@@ -54,7 +47,7 @@
                             {{else}}
                                 <span class="badge bg-danger">Disabled</span>
                             {{/if}}
-                        </h6>
+                        </h2>
                     </div>
                     <div class="opacity-50">
                         <i class="bi bi-person-check" style="font-size: 2rem;"></i>
@@ -65,42 +58,6 @@
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning"></i> Quick Actions
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-2">
-                        <a href="/profile" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-person"></i> Update Profile
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <a href="/change-password" class="btn btn-outline-warning w-100">
-                            <i class="bi bi-key"></i> Change Password
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <a href="/sessions" class="btn btn-outline-info w-100">
-                            <i class="bi bi-activity"></i> Manage Sessions
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <button type="button" class="btn btn-outline-danger w-100" onclick="revokeAllSessions()">
-                            <i class="bi bi-x-octagon"></i> Revoke All Sessions
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Account Information and Active Sessions -->
 <div class="row">
@@ -112,7 +69,7 @@
                     <i class="bi bi-person-circle"></i> Account Information
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="min-height: 200px;">
                 <dl class="row">
                     <dt class="col-sm-4">Username:</dt>
                     <dd class="col-sm-8">{{user.username}}</dd>
@@ -147,12 +104,6 @@
                     <dd class="col-sm-8">{{formatDate stats.lastLogin}}</dd>
                     {{/if}}
                 </dl>
-
-                <div class="mt-3">
-                    <a href="/profile" class="btn btn-primary btn-sm">
-                        <i class="bi bi-pencil"></i> Edit Profile
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -162,10 +113,10 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="bi bi-activity"></i> Recent Active Sessions
+                    <i class="bi bi-activity"></i> Recent Sessions
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="min-height: 200px;">
                 {{#if activeSessions.length}}
                     <div class="list-group list-group-flush">
                         {{#each activeSessions}}

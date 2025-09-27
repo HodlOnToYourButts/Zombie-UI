@@ -60,7 +60,7 @@ router.get('/', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     };
 
     res.render('user-dashboard', addUserContext(req, {
-      title: 'My Account',
+      title: 'Dashboard',
       isDashboard: true,
       user: user.toPublicJSON(),
       stats,
@@ -88,7 +88,7 @@ router.get('/profile', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     }
 
     res.render('user-profile', addUserContext(req, {
-      title: 'My Profile',
+      title: 'Profile',
       isProfile: true,
       user: user.toPublicJSON()
     }));
@@ -134,7 +134,7 @@ router.post('/profile', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     console.error('Update profile error:', error);
     const user = await User.findByUsername(req.oidc_user.username);
     res.render('user-profile', addUserContext(req, {
-      title: 'My Profile',
+      title: 'Profile',
       isProfile: true,
       user: user ? user.toPublicJSON() : {},
       message: 'Error updating profile: ' + error.message,
@@ -144,7 +144,7 @@ router.post('/profile', oidcAuth.requireOidcAuth('user'), async (req, res) => {
 });
 
 // Change password form
-router.get('/change-password', oidcAuth.requireOidcAuth('user'), async (req, res) => {
+router.get('/password', oidcAuth.requireOidcAuth('user'), async (req, res) => {
   try {
     const user = await User.findByUsername(req.oidc_user.username);
     if (!user) {
@@ -155,8 +155,8 @@ router.get('/change-password', oidcAuth.requireOidcAuth('user'), async (req, res
     }
 
     res.render('user-change-password', addUserContext(req, {
-      title: 'Change Password',
-      isChangePassword: true
+      title: 'Password',
+      isPassword: true
     }));
   } catch (error) {
     console.error('Change password form error:', error);
@@ -168,7 +168,7 @@ router.get('/change-password', oidcAuth.requireOidcAuth('user'), async (req, res
 });
 
 // Process password change
-router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, res) => {
+router.post('/password', oidcAuth.requireOidcAuth('user'), async (req, res) => {
   try {
     const user = await User.findByUsername(req.oidc_user.username);
     if (!user) {
@@ -182,8 +182,8 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.render('user-change-password', addUserContext(req, {
-        title: 'Change Password',
-        isChangePassword: true,
+        title: 'Password',
+        isPassword: true,
         message: 'All fields are required',
         messageType: 'danger'
       }));
@@ -191,8 +191,8 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
 
     if (newPassword !== confirmPassword) {
       return res.render('user-change-password', addUserContext(req, {
-        title: 'Change Password',
-        isChangePassword: true,
+        title: 'Password',
+        isPassword: true,
         message: 'New passwords do not match',
         messageType: 'danger'
       }));
@@ -200,8 +200,8 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
 
     if (newPassword.length < 8) {
       return res.render('user-change-password', addUserContext(req, {
-        title: 'Change Password',
-        isChangePassword: true,
+        title: 'Password',
+        isPassword: true,
         message: 'New password must be at least 8 characters long',
         messageType: 'danger'
       }));
@@ -211,8 +211,8 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
     const isCurrentPasswordValid = await user.verifyPassword(currentPassword);
     if (!isCurrentPasswordValid) {
       return res.render('user-change-password', addUserContext(req, {
-        title: 'Change Password',
-        isChangePassword: true,
+        title: 'Password',
+        isPassword: true,
         message: 'Current password is incorrect',
         messageType: 'danger'
       }));
@@ -235,8 +235,8 @@ router.post('/change-password', oidcAuth.requireOidcAuth('user'), async (req, re
   } catch (error) {
     console.error('Change password error:', error);
     res.render('user-change-password', addUserContext(req, {
-      title: 'Change Password',
-      isChangePassword: true,
+      title: 'Password',
+      isPassword: true,
       message: 'Error changing password: ' + error.message,
       messageType: 'danger'
     }));
@@ -290,7 +290,7 @@ router.get('/sessions', oidcAuth.requireOidcAuth('user'), async (req, res) => {
     };
 
     res.render('user-sessions', addUserContext(req, {
-      title: 'My Sessions',
+      title: 'Sessions',
       isSessions: true,
       sessions: sessionsWithStatus,
       stats
